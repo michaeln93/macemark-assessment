@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Macemark Technology — Facility Assessment Tool</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1b3a5c;
+  --navy-dark:#0f2640;
+  --blue:#2563eb;
+  --blue-dark:#1e40af;
+  --blue-light:#dbeafe;
+  --green:#057a55;
+  --green-light:#d1fae5;
+  --amber:#b45309;
+  --amber-light:#fef3c7;
+  --red:#c81e1e;
+  --red-light:#fde8e8;
+  --purple:#6d28d9;
+  --purple-light:#ede9fe;
+  --gray-50:#f9fafb;
+  --gray-100:#f3f4f6;
+  --gray-200:#e5e7eb;
+  --gray-300:#d1d5db;
+  --gray-400:#9ca3af;
+  --gray-500:#6b7280;
+  --gray-600:#4b5563;
+  --gray-700:#374151;
+  --gray-800:#1f2937;
+  --white:#fff;
+  --radius:8px;
+  --shadow:0 1px 3px rgba(0,0,0,.1);
+  --shadow-md:0 4px 6px rgba(0,0,0,.1);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--gray-50);color:var(--gray-800);line-height:1.5;-webkit-text-size-adjust:100%}
+
+/* Header */
+header{background:var(--navy);color:var(--white);padding:16px 20px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between}
+header h1{font-size:17px;font-weight:700;letter-spacing:3px;text-transform:uppercase}
+header .subtitle{font-size:11px;color:rgba(255,255,255,.5);font-weight:400;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+
+/* Main */
+main{max-width:720px;margin:0 auto;padding:16px}
+
+/* Step Indicator */
+.step-indicator{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding:0 8px;position:relative}
+.step-indicator::before{content:'';position:absolute;top:16px;left:40px;right:40px;height:2px;background:var(--gray-200);z-index:0}
+.step-item{display:flex;flex-direction:column;align-items:center;position:relative;z-index:1;cursor:pointer;flex:1}
+.step-circle{width:32px;height:32px;border-radius:50%;border:2px solid var(--gray-300);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--gray-400);transition:all .2s}
+.step-label{font-size:10px;color:var(--gray-400);margin-top:6px;text-align:center;max-width:70px;line-height:1.2}
+.step-item.active .step-circle{border-color:var(--blue);background:var(--blue);color:var(--white)}
+.step-item.active .step-label{color:var(--blue);font-weight:600}
+.step-item.done .step-circle{border-color:var(--green);background:var(--green);color:var(--white)}
+.step-item.done .step-label{color:var(--green)}
+.step-item.skipped .step-circle{border-color:var(--gray-200);background:var(--gray-100);color:var(--gray-300);font-size:11px}
+.step-item.skipped .step-label{color:var(--gray-300);text-decoration:line-through}
+
+/* Cards */
+.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+.card-header{padding:14px 16px;font-weight:600;font-size:15px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:8px}
+.card-header .icon{font-size:18px}
+.card-body{padding:16px}
+
+/* Forms */
+.form-row{margin-bottom:14px}
+.form-row label{display:block;font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:4px}
+.form-row .hint{font-size:11px;color:var(--gray-500);margin-bottom:4px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+input[type="text"],input[type="email"],input[type="tel"],input[type="number"],select,textarea{
+  width:100%;padding:9px 12px;border:1px solid var(--gray-200);border-radius:var(--radius);font-size:14px;font-family:inherit;background:var(--white);transition:border-color .15s
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
+textarea{resize:vertical;min-height:60px}
+
+/* Toggle group */
+.toggle-row{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--gray-50);border-radius:var(--radius);margin-bottom:8px}
+.toggle-row .toggle-label{flex:1;font-weight:600;font-size:14px}
+.toggle-row .toggle-meta{font-size:12px;color:var(--gray-500)}
+.toggle-btn{display:flex;gap:0;border-radius:var(--radius);overflow:hidden;border:1px solid var(--gray-200)}
+.toggle-btn button{padding:6px 14px;border:none;background:var(--white);font-size:13px;font-weight:500;cursor:pointer;color:var(--gray-500);transition:all .15s}
+.toggle-btn button.active{background:var(--blue);color:var(--white)}
+.toggle-detail{max-height:0;overflow:hidden;transition:max-height .3s ease;padding:0 16px}
+.toggle-detail.open{max-height:600px;padding:12px 16px}
+.toggle-detail .form-grid{margin-top:8px}
+
+/* Equipment section */
+.equip-section{border:1px solid var(--gray-100);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
+.equip-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--gray-50);cursor:pointer}
+.equip-header h3{font-size:14px;font-weight:600}
+.equip-body{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease;padding:0 16px}
+.equip-body.open{max-height:500px;padding:12px 16px}
+
+/* Checkboxes */
+.check-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.check-item{display:flex;align-items:flex-start;gap:8px;padding:10px 14px;border:1px solid var(--gray-200);border-radius:var(--radius);cursor:pointer;transition:all .15s;flex:1;min-width:200px}
+.check-item:hover{border-color:var(--blue-light);background:var(--blue-light)}
+.check-item.checked{border-color:var(--blue);background:var(--blue-light)}
+.check-item input[type="checkbox"]{margin-top:2px;accent-color:var(--blue)}
+.check-item .check-label{font-size:13px;font-weight:600}
+.check-item .check-desc{font-size:11px;color:var(--gray-500);margin-top:2px}
+
+/* Info box */
+.info-box{padding:12px 14px;background:var(--blue-light);border-radius:var(--radius);margin-bottom:14px;font-size:13px;color:var(--blue-dark);border-left:3px solid var(--blue)}
+.info-box strong{display:block;margin-bottom:4px}
+
+/* Buttons */
+.btn{padding:10px 20px;border:none;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--blue);color:var(--white)}
+.btn-primary:hover{background:var(--blue-dark)}
+.btn-secondary{background:var(--gray-100);color:var(--gray-700);border:1px solid var(--gray-200)}
+.btn-secondary:hover{background:var(--gray-200)}
+.btn-success{background:var(--green);color:var(--white)}
+.btn-success:hover{background:#046c4e}
+.btn-danger{background:var(--red);color:var(--white)}
+.btn-full{width:100%;justify-content:center}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+/* Wizard nav */
+.wizard-nav{display:flex;justify-content:space-between;margin-top:20px;padding-top:16px;border-top:1px solid var(--gray-100)}
+
+/* Wizard steps */
+.wizard-step{display:none}
+.wizard-step.active{display:block}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.badge-blue{background:var(--blue-light);color:var(--blue)}
+.badge-green{background:var(--green-light);color:var(--green)}
+.badge-amber{background:var(--amber-light);color:var(--amber)}
+.badge-red{background:var(--red-light);color:var(--red)}
+.badge-purple{background:var(--purple-light);color:var(--purple)}
+.badge-gray{background:var(--gray-100);color:var(--gray-500)}
+
+/* Recommendation cards */
+.rec-card{border:1px solid var(--gray-200);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;border-left:4px solid var(--blue)}
+.rec-card.high{border-left-color:var(--red)}
+.rec-card.medium{border-left-color:var(--amber)}
+.rec-card-header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.rec-card-header h3{font-size:14px;font-weight:700}
+.rec-sku{font-size:11px;color:var(--gray-400);font-weight:400;font-family:monospace;margin-top:2px}
+.rec-card-body{padding:0 16px 12px}
+.rec-card-body p{font-size:13px;color:var(--gray-600);margin-bottom:6px}
+.rec-standard{font-size:12px;color:var(--blue-dark);background:var(--blue-light);padding:6px 10px;border-radius:4px;margin-top:6px;display:inline-block}
+.rec-volume{font-size:12px;color:var(--gray-500);margin-top:4px}
+
+/* Gap alert */
+.gap-alert{background:var(--red-light);border:1px solid var(--red);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px}
+.gap-alert h3{color:var(--red);font-size:14px;margin-bottom:6px}
+.gap-alert ul{margin-left:16px;font-size:13px;color:var(--gray-700)}
+.gap-alert li{margin-bottom:4px}
+
+/* Feature highlight */
+.feature-card{background:linear-gradient(135deg,var(--navy) 0%,var(--blue-dark) 100%);color:var(--white);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.feature-card h3{font-size:16px;margin-bottom:8px}
+.feature-card p{font-size:13px;opacity:.9;margin-bottom:4px}
+.feature-card .feature-list{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
+.feature-card .feature-tag{background:rgba(255,255,255,.15);padding:4px 10px;border-radius:12px;font-size:11px}
+
+/* Summary section */
+.summary-section{margin-bottom:16px}
+.summary-section h3{font-size:14px;font-weight:600;color:var(--gray-700);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--gray-100)}
+.summary-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}
+.summary-row .label{color:var(--gray-500)}
+.summary-row .value{font-weight:600}
+
+/* Consumption snapshot */
+.snapshot-card{background:var(--white);border:2px solid var(--navy);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+.snapshot-header{background:var(--navy);color:var(--white);padding:12px 16px;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:space-between}
+.snapshot-body{padding:16px}
+.snapshot-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.snapshot-item{background:var(--gray-50);border-radius:var(--radius);padding:12px;text-align:center}
+.snapshot-item .snap-value{font-size:22px;font-weight:800;color:var(--navy)}
+.snapshot-item .snap-label{font-size:11px;color:var(--gray-500);margin-top:2px}
+.snapshot-item.highlight{background:var(--green-light);border:1px solid var(--green)}
+.snapshot-item.highlight .snap-value{color:var(--green)}
+.snapshot-item.warn{background:var(--amber-light);border:1px solid var(--amber)}
+.snapshot-item.warn .snap-value{color:var(--amber)}
+.bundling-badge{display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border-radius:var(--radius);font-size:13px;font-weight:600;margin-top:12px}
+.bundling-yes{background:var(--green-light);color:var(--green)}
+.bundling-maybe{background:var(--amber-light);color:var(--amber)}
+.bundling-no{background:var(--gray-100);color:var(--gray-500)}
+
+/* Rec category divider */
+.rec-category{font-size:13px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin:20px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--gray-200)}
+
+/* Radio group */
+.radio-group{display:flex;flex-wrap:wrap;gap:8px}
+.radio-item{display:flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--gray-200);border-radius:var(--radius);cursor:pointer;font-size:13px;transition:all .15s}
+.radio-item:hover{border-color:var(--blue-light)}
+.radio-item.selected{border-color:var(--blue);background:var(--blue-light)}
+.radio-item input[type="radio"]{accent-color:var(--blue)}
+
+/* Empty / start screen */
+.start-screen{text-align:center;padding:80px 20px}
+.start-screen h2{font-size:24px;margin-bottom:8px;color:var(--navy);letter-spacing:1px}
+.start-screen .est{font-size:11px;color:var(--gray-400);letter-spacing:3px;margin-bottom:20px}
+.start-screen p{font-size:14px;color:var(--gray-500);margin-bottom:28px;max-width:440px;margin-left:auto;margin-right:auto;line-height:1.6}
+
+/* Responsive */
+@media(max-width:480px){
+  .form-grid{grid-template-columns:1fr}
+  .step-label{font-size:9px;max-width:50px}
+  .step-circle{width:28px;height:28px;font-size:11px}
+  .check-item{min-width:100%}
+  main{padding:12px}
+}
+
+/* Process Flow Visual */
+.process-flow{margin-bottom:24px}
+.process-flow h3{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:12px}
+.flow-steps{display:flex;gap:0;overflow-x:auto;padding-bottom:8px}
+.flow-step{flex:1;min-width:140px;position:relative}
+.flow-step:not(:last-child)::after{content:'';position:absolute;top:24px;right:-1px;width:2px;height:0;border-right:2px dashed var(--gray-300);height:calc(100% - 24px);display:none}
+.flow-step-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.flow-num{width:28px;height:28px;border-radius:50%;background:var(--navy);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.flow-title{font-size:12px;font-weight:700;color:var(--navy);line-height:1.2}
+.flow-arrow{display:flex;align-items:center;justify-content:center;min-width:28px;color:var(--gray-300);font-size:20px;padding-top:0;align-self:flex-start;margin-top:8px}
+.flow-products{display:flex;flex-direction:column;gap:4px;padding-left:36px}
+.flow-product{font-size:11px;padding:4px 8px;background:var(--blue-light);border-radius:4px;color:var(--navy);font-weight:500;border-left:3px solid var(--blue)}
+.flow-product.chem{background:var(--green-light);border-left-color:var(--green)}
+.flow-product.endo{background:var(--purple-light);border-left-color:var(--purple)}
+.flow-product-sku{font-size:9px;color:var(--gray-500);font-weight:400}
+
+/* Vertical flow for mobile */
+@media(max-width:700px){
+  .flow-steps{flex-direction:column;gap:4px}
+  .flow-arrow{transform:rotate(90deg);min-width:auto;margin:0 auto}
+  .flow-step{min-width:auto}
+}
+
+/* Print */
+@media print{
+  header,.step-indicator,.wizard-nav,.btn,.no-print{display:none!important}
+  .wizard-step{display:block!important}
+  .card{box-shadow:none;border:1px solid var(--gray-200);break-inside:avoid}
+  body{background:#fff}
+  main{max-width:100%;padding:0}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>MACEMARK TECHNOLOGY</h1>
+    <span class="subtitle">Facility Assessment Tool</span>
+  </div>
+  <div id="headerInfo" style="font-size:12px;text-align:right"></div>
+</header>
+
+<main>
+  <!-- Start Screen -->
+  <div id="startScreen" class="start-screen">
+    <img src="macemark_logo.png" alt="Macemark Technology" height="100" style="display:block;margin:0 auto 20px">
+    <h2>Facility Assessment</h2>
+    <p>Evaluate your CSSD and Endoscopy reprocessing needs against AS 5369 and receive tailored consumable product recommendations from Macemark Technology.</p>
+    <button class="btn btn-primary" onclick="startAssessment()">Start New Assessment</button>
+  </div>
+
+  <!-- Wizard -->
+  <div id="wizard" style="display:none">
+    <!-- Step Indicator -->
+    <div class="step-indicator" id="stepIndicator"></div>
+
+    <!-- Step 1: Facility Profile -->
+    <div class="wizard-step" id="step1">
+      <div class="card">
+        <div class="card-header">Facility Profile</div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-row">
+              <label>Facility Name</label>
+              <input type="text" id="facilityName" placeholder="e.g. Royal Brisbane Hospital">
+            </div>
+            <div class="form-row">
+              <label>Contact Person</label>
+              <input type="text" id="contactPerson" placeholder="Full name">
+            </div>
+            <div class="form-row">
+              <label>Email</label>
+              <input type="email" id="contactEmail" placeholder="email@facility.com">
+            </div>
+            <div class="form-row">
+              <label>Phone</label>
+              <input type="tel" id="contactPhone" placeholder="04xx xxx xxx">
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Facility Type</label>
+            <select id="facilityType" onchange="updateStepVisibility()">
+              <option value="">-- Select --</option>
+              <option value="hospital_cssd">Hospital CSSD</option>
+              <option value="day_surgery">Day Surgery</option>
+              <option value="dental">Dental Practice</option>
+              <option value="endoscopy">Endoscopy Unit</option>
+              <option value="combined">Combined CSSD + Endoscopy</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Approximate Staff Count (reprocessing department)</label>
+            <input type="number" id="staffCount" min="1" placeholder="e.g. 12">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: CSSD Equipment -->
+    <div class="wizard-step" id="step2">
+      <div class="card">
+        <div class="card-header">CSSD Equipment &amp; Operations</div>
+        <div class="card-body">
+          <div class="info-box">
+            <strong>Why do we ask about your equipment?</strong>
+            Understanding your equipment inventory and cycle volumes lets us accurately estimate consumable requirements and identify compliance gaps against AS 5369.
+          </div>
+
+          <!-- Steam Sterilizers -->
+          <div class="equip-section">
+            <div class="equip-header" onclick="toggleEquip('steam')">
+              <h3>Steam Sterilizers</h3>
+              <div class="toggle-btn">
+                <button id="steamYes" onclick="event.stopPropagation();setToggle('steam',true)">Yes</button>
+                <button id="steamNo" onclick="event.stopPropagation();setToggle('steam',false)" class="active">No</button>
+              </div>
+            </div>
+            <div class="equip-body" id="steamDetail">
+              <div class="form-grid">
+                <div class="form-row">
+                  <label>How many?</label>
+                  <input type="number" id="steamCount" min="0" placeholder="0">
+                </div>
+                <div class="form-row">
+                  <label>Brand / Model</label>
+                  <input type="text" id="steamBrand" placeholder="e.g. Atherton Gorilla">
+                </div>
+                <div class="form-row">
+                  <label>Approx. Daily Cycles (total)</label>
+                  <input type="number" id="steamCycles" min="0" placeholder="e.g. 20">
+                </div>
+                <div class="form-row">
+                  <label>Sterilizer Type</label>
+                  <select id="steamType">
+                    <option value="prevac">Pre-vacuum (most common)</option>
+                    <option value="gravity">Gravity displacement</option>
+                    <option value="both">Both types</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Low-Temp Sterilizers -->
+          <div class="equip-section">
+            <div class="equip-header" onclick="toggleEquip('lowtemp')">
+              <h3>Low-Temperature Sterilizers</h3>
+              <div class="toggle-btn">
+                <button id="lowtempYes" onclick="event.stopPropagation();setToggle('lowtemp',true)">Yes</button>
+                <button id="lowtempNo" onclick="event.stopPropagation();setToggle('lowtemp',false)" class="active">No</button>
+              </div>
+            </div>
+            <div class="equip-body" id="lowtempDetail">
+              <div class="form-grid">
+                <div class="form-row">
+                  <label>How many?</label>
+                  <input type="number" id="lowtempCount" min="0" placeholder="0">
+                </div>
+                <div class="form-row">
+                  <label>Type</label>
+                  <select id="lowtempType">
+                    <option value="h2o2">Hydrogen Peroxide (H2O2)</option>
+                    <option value="eo">Ethylene Oxide (EO)</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div class="form-row">
+                  <label>Brand / Model</label>
+                  <input type="text" id="lowtempBrand" placeholder="e.g. Atherton Dragon">
+                </div>
+                <div class="form-row">
+                  <label>Approx. Daily Cycles</label>
+                  <input type="number" id="lowtempCycles" min="0" placeholder="e.g. 5">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Washer-Disinfectors -->
+          <div class="equip-section">
+            <div class="equip-header" onclick="toggleEquip('wd')">
+              <h3>Washer-Disinfectors</h3>
+              <div class="toggle-btn">
+                <button id="wdYes" onclick="event.stopPropagation();setToggle('wd',true)">Yes</button>
+                <button id="wdNo" onclick="event.stopPropagation();setToggle('wd',false)" class="active">No</button>
+              </div>
+            </div>
+            <div class="equip-body" id="wdDetail">
+              <div class="form-grid">
+                <div class="form-row">
+                  <label>How many?</label>
+                  <input type="number" id="wdCount" min="0" placeholder="0">
+                </div>
+                <div class="form-row">
+                  <label>Brand / Model</label>
+                  <input type="text" id="wdBrand" placeholder="e.g. KEN IQ6">
+                </div>
+                <div class="form-row">
+                  <label>Approx. Daily Cycles (total)</label>
+                  <input type="number" id="wdCycles" min="0" placeholder="e.g. 30">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ultrasonics -->
+          <div class="equip-section">
+            <div class="equip-header" onclick="toggleEquip('ultra')">
+              <h3>Ultrasonic Cleaners</h3>
+              <div class="toggle-btn">
+                <button id="ultraYes" onclick="event.stopPropagation();setToggle('ultra',true)">Yes</button>
+                <button id="ultraNo" onclick="event.stopPropagation();setToggle('ultra',false)" class="active">No</button>
+              </div>
+            </div>
+            <div class="equip-body" id="ultraDetail">
+              <div class="form-grid">
+                <div class="form-row">
+                  <label>How many?</label>
+                  <input type="number" id="ultraCount" min="0" placeholder="0">
+                </div>
+                <div class="form-row">
+                  <label>Approx. Daily Cycles</label>
+                  <input type="number" id="ultraCycles" min="0" placeholder="e.g. 10">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Traceability -->
+          <div class="form-row" style="margin-top:16px">
+            <label>How do you currently track and record sterilization results?</label>
+            <select id="cssdTraceability">
+              <option value="">-- Select --</option>
+              <option value="none">No formal tracking</option>
+              <option value="paper">Paper-based logs</option>
+              <option value="spreadsheet">Spreadsheets</option>
+              <option value="digital">Digital system / software</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label>Compliance Standard</label>
+            <select id="cssdStandard">
+              <option value="as5369" selected>AS 5369 — Reprocessing of Reusable Medical Devices</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Endoscopy -->
+    <div class="wizard-step" id="step3">
+      <div class="card">
+        <div class="card-header">Endoscopy Equipment &amp; Operations</div>
+        <div class="card-body">
+          <div class="info-box">
+            <strong>Endoscope Reprocessing</strong>
+            Proper reprocessing of flexible endoscopes is critical for patient safety. AS 5369 sets out the requirements for cleaning, disinfection and storage of endoscopes.
+          </div>
+
+          <div class="form-grid">
+            <div class="form-row">
+              <label>Automated Endoscope Reprocessors (AERs)</label>
+              <input type="number" id="aerCount" min="0" placeholder="How many?">
+            </div>
+            <div class="form-row">
+              <label>AER Brand / Model</label>
+              <input type="text" id="aerBrand" placeholder="e.g. Olympus, Medivators">
+            </div>
+            <div class="form-row">
+              <label>Number of Endoscopes</label>
+              <input type="number" id="scopeCount" min="0" placeholder="Total scopes">
+            </div>
+            <div class="form-row">
+              <label>Approx. Daily Procedures</label>
+              <input type="number" id="dailyProcedures" min="0" placeholder="e.g. 25">
+            </div>
+          </div>
+
+          <div class="form-row" style="margin-top:12px">
+            <label>Current Endoscopy Cleaning Products</label>
+            <input type="text" id="endoChemistry" placeholder="Brand / products currently in use">
+          </div>
+
+          <div class="form-row">
+            <label>How do you track endoscope reprocessing?</label>
+            <select id="endoTraceability">
+              <option value="">-- Select --</option>
+              <option value="none">No formal tracking</option>
+              <option value="paper">Paper-based logs</option>
+              <option value="spreadsheet">Spreadsheets</option>
+              <option value="digital">Digital system / software</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Current Consumables -->
+    <div class="wizard-step" id="step4">
+      <div class="card">
+        <div class="card-header">Current Consumables</div>
+        <div class="card-body">
+          <div class="form-row">
+            <label>Current Cleaning Chemistry Brand / Products</label>
+            <input type="text" id="currentChemistry" placeholder="e.g. Ecolab Sekusept, 3M, etc.">
+          </div>
+
+          <div class="form-row" style="margin-top:16px">
+            <label>Chemical Indicators Currently in Use</label>
+            <div class="hint">Select all classes you currently use. Each class serves a different purpose in sterilization monitoring (ISO 11140-1).</div>
+            <div id="ciChecks" class="check-group" style="margin-top:8px">
+              <div class="check-item" onclick="toggleCheck(this)">
+                <input type="checkbox" value="1">
+                <div>
+                  <div class="check-label">Class 1 — Process Indicator</div>
+                  <div class="check-desc">Autoclave tape or printed indicators on packaging. Shows the item has been <strong>exposed</strong> to the sterilization process (not that it is sterile).</div>
+                </div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)">
+                <input type="checkbox" value="2">
+                <div>
+                  <div class="check-label">Class 2 — Bowie-Dick Test</div>
+                  <div class="check-desc">Specific-use indicator for <strong>air removal testing</strong> in pre-vacuum steam sterilizers. Required as a daily test to verify the vacuum system is working correctly.</div>
+                </div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)">
+                <input type="checkbox" value="4">
+                <div>
+                  <div class="check-label">Class 4 — Multi-Variable</div>
+                  <div class="check-desc">Reacts to <strong>two or more</strong> critical sterilization variables (e.g. time and temperature). Used for routine pack/load monitoring.</div>
+                </div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)">
+                <input type="checkbox" value="5">
+                <div>
+                  <div class="check-label">Class 5 — Integrating Indicator</div>
+                  <div class="check-desc">Reacts to <strong>all critical variables</strong> of the sterilization process. Performance correlates with biological indicator results — a reliable in-pack monitor.</div>
+                </div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)">
+                <input type="checkbox" value="6">
+                <div>
+                  <div class="check-label">Class 6 — Emulating Indicator</div>
+                  <div class="check-desc"><strong>Cycle-specific</strong> indicator that reacts to all critical variables for one specific sterilization cycle type (e.g. 134°C/3.5 min). The most precise chemical indicator.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row" style="margin-top:12px">
+            <label>Chemical Indicator Brand</label>
+            <input type="text" id="ciBrand" placeholder="e.g. 3M, gke, Terragene">
+          </div>
+
+          <div class="form-grid" style="margin-top:12px">
+            <div class="form-row">
+              <label>Process Challenge Devices (PCDs)?</label>
+              <select id="hasPCD">
+                <option value="">-- Select --</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+                <option value="unsure">Unsure</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Residual Protein Testing?</label>
+              <select id="hasProteinTest">
+                <option value="">-- Select --</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+                <option value="unsure">Unsure</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row" style="margin-top:12px">
+            <label>How are consumable/indicator results recorded?</label>
+            <select id="resultRecording">
+              <option value="">-- Select --</option>
+              <option value="none">No formal recording</option>
+              <option value="paper">Paper-based logs</option>
+              <option value="spreadsheet">Spreadsheets</option>
+              <option value="digital">Digital system / software</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: Compliance & Goals -->
+    <div class="wizard-step" id="step5">
+      <div class="card">
+        <div class="card-header">Compliance &amp; Goals</div>
+        <div class="card-body">
+          <div class="form-row">
+            <label>AS 5369 Compliance Status</label>
+            <div class="radio-group" id="complianceStatus">
+              <label class="radio-item" onclick="selectRadio(this,'complianceStatus')">
+                <input type="radio" name="compliance" value="compliant"> Compliant
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'complianceStatus')">
+                <input type="radio" name="compliance" value="partial"> Partially Compliant
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'complianceStatus')">
+                <input type="radio" name="compliance" value="non_compliant"> Non-Compliant
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'complianceStatus')">
+                <input type="radio" name="compliance" value="unknown"> Unknown
+              </label>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label>Recent Audit Findings or Concerns</label>
+            <textarea id="auditFindings" placeholder="Any recent audit results, non-conformances, or areas of concern..."></textarea>
+          </div>
+
+          <div class="form-row">
+            <label>Biggest Challenges (select all that apply)</label>
+            <div id="challengeChecks" class="check-group">
+              <div class="check-item" onclick="toggleCheck(this)" style="min-width:150px">
+                <input type="checkbox" value="cost"> <div><div class="check-label">Cost</div></div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)" style="min-width:150px">
+                <input type="checkbox" value="compliance"> <div><div class="check-label">Compliance</div></div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)" style="min-width:150px">
+                <input type="checkbox" value="training"> <div><div class="check-label">Training</div></div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)" style="min-width:150px">
+                <input type="checkbox" value="reliability"> <div><div class="check-label">Equipment Reliability</div></div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)" style="min-width:150px">
+                <input type="checkbox" value="turnaround"> <div><div class="check-label">Turnaround Time</div></div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)" style="min-width:150px">
+                <input type="checkbox" value="water_quality"> <div><div class="check-label">Water Quality</div></div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)" style="min-width:150px">
+                <input type="checkbox" value="traceability"> <div><div class="check-label">Traceability</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label>What does best practice look like for your facility?</label>
+            <textarea id="aspirations" placeholder="What standards or goals are you working towards? What would the ideal setup look like?"></textarea>
+          </div>
+
+          <div class="form-row">
+            <label>Would you be interested in packaging your consumables into a bundled supply agreement for additional cost savings?</label>
+            <div class="radio-group" id="bundlingInterest">
+              <label class="radio-item" onclick="selectRadio(this,'bundlingInterest')">
+                <input type="radio" name="bundling" value="yes"> Yes, interested
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'bundlingInterest')">
+                <input type="radio" name="bundling" value="maybe"> Tell me more
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'bundlingInterest')">
+                <input type="radio" name="bundling" value="no"> Not at this time
+              </label>
+            </div>
+            <div class="info-box" style="margin-top:8px">
+              <strong>Bundled Supply Agreements</strong>
+              Packaging your indicators, chemistry and consumables into a single supply agreement can simplify procurement, reduce per-unit costs, and ensure you never run short of critical items.
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label>Additional Notes</label>
+            <textarea id="additionalNotes" placeholder="Anything else we should know..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 6: Recommendations -->
+    <div class="wizard-step" id="step6">
+      <div id="recommendationsOutput"></div>
+    </div>
+
+    <!-- Wizard Navigation -->
+    <div class="wizard-nav no-print" id="wizardNav"></div>
+  </div>
+</main>
+
+<script>
+/* ──────── State ──────── */
+let assessment = null;
+let currentStep = 1;
+const STEPS = [
+  { num: 1, label: 'Facility' },
+  { num: 2, label: 'CSSD' },
+  { num: 3, label: 'Endoscopy' },
+  { num: 4, label: 'Consumables' },
+  { num: 5, label: 'Compliance' },
+  { num: 6, label: 'Results' }
+];
+
+/* ──────── Utilities ──────── */
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6) }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+function val(id){ const el=document.getElementById(id); return el?el.value.trim():'' }
+function numVal(id){ return parseInt(val(id))||0 }
+
+/* ──────── Toggle / Checkbox helpers ──────── */
+const toggleState = { steam:false, lowtemp:false, wd:false, ultra:false };
+
+function setToggle(key, v){
+  toggleState[key]=v;
+  document.getElementById(key+'Yes').className = v?'active':'';
+  document.getElementById(key+'No').className = v?'':'active';
+  const detail = document.getElementById(key+'Detail');
+  if(v) detail.classList.add('open'); else detail.classList.remove('open');
+}
+function toggleEquip(key){ setToggle(key,!toggleState[key]) }
+
+function toggleCheck(el){
+  const cb=el.querySelector('input[type="checkbox"]');
+  cb.checked=!cb.checked;
+  el.classList.toggle('checked',cb.checked);
+}
+
+function selectRadio(el, groupId){
+  document.querySelectorAll('#'+groupId+' .radio-item').forEach(r=>r.classList.remove('selected'));
+  el.classList.add('selected');
+  el.querySelector('input[type="radio"]').checked=true;
+}
+
+function getCheckedValues(containerId){
+  const vals=[];
+  document.querySelectorAll('#'+containerId+' input[type="checkbox"]:checked').forEach(cb=>vals.push(cb.value));
+  return vals;
+}
+
+function getRadioValue(name){
+  const r=document.querySelector('input[name="'+name+'"]:checked');
+  return r?r.value:'';
+}
+
+/* ──────── Step Visibility ──────── */
+function getApplicableSteps(){
+  const ft=val('facilityType');
+  if(ft==='endoscopy') return [1,3,4,5,6];
+  if(ft==='hospital_cssd'||ft==='dental') return [1,2,4,5,6];
+  return [1,2,3,4,5,6]; // combined, day_surgery, or not yet selected
+}
+
+function updateStepVisibility(){ renderStepIndicator() }
+
+/* ──────── Rendering ──────── */
+function renderStepIndicator(){
+  const applicable = getApplicableSteps();
+  let html='';
+  STEPS.forEach(s=>{
+    const isApplicable = applicable.includes(s.num);
+    const isActive = s.num===currentStep;
+    const isDone = isApplicable && applicable.indexOf(s.num)<applicable.indexOf(currentStep);
+    let cls='step-item';
+    if(!isApplicable) cls+=' skipped';
+    else if(isActive) cls+=' active';
+    else if(isDone) cls+=' done';
+    html+=`<div class="${cls}" onclick="jumpToStep(${s.num})">
+      <div class="step-circle">${isDone&&isApplicable?'&#10003;':s.num}</div>
+      <div class="step-label">${s.label}</div>
+    </div>`;
+  });
+  document.getElementById('stepIndicator').innerHTML=html;
+}
+
+function renderWizardNav(){
+  const applicable = getApplicableSteps();
+  const idx = applicable.indexOf(currentStep);
+  const prev = idx>0? applicable[idx-1]:null;
+  const next = idx<applicable.length-1? applicable[idx+1]:null;
+  let html='';
+  if(prev) html+=`<button class="btn btn-secondary" onclick="goStep(${prev})">&larr; Back</button>`;
+  else html+='<span></span>';
+  if(next) html+=`<button class="btn btn-primary" onclick="goStep(${next})">Next &rarr;</button>`;
+  else if(currentStep===6) html+=`<button class="btn btn-success" onclick="emailResults()">Email Results to Sales</button>`;
+  else html+='<span></span>';
+  document.getElementById('wizardNav').innerHTML=html;
+}
+
+function showStep(n){
+  document.querySelectorAll('.wizard-step').forEach(el=>el.classList.remove('active'));
+  const stepEl = document.getElementById('step'+n);
+  if(stepEl) stepEl.classList.add('active');
+  currentStep=n;
+  renderStepIndicator();
+  renderWizardNav();
+  if(n===6) generateRecommendations();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function goStep(n){
+  collectCurrentStep();
+  showStep(n);
+}
+
+function jumpToStep(n){
+  const applicable=getApplicableSteps();
+  if(!applicable.includes(n)) return;
+  collectCurrentStep();
+  showStep(n);
+}
+
+/* ──────── Data Collection ──────── */
+function collectCurrentStep(){
+  if(!assessment) return;
+  switch(currentStep){
+    case 1:
+      assessment.facility = {
+        name: val('facilityName'),
+        contactPerson: val('contactPerson'),
+        contactEmail: val('contactEmail'),
+        contactPhone: val('contactPhone'),
+        facilityType: val('facilityType'),
+        staffCount: numVal('staffCount')
+      };
+      break;
+    case 2:
+      assessment.cssd = {
+        steam: { has:toggleState.steam, count:numVal('steamCount'), brand:val('steamBrand'), dailyCycles:numVal('steamCycles'), type:val('steamType') },
+        lowtemp: { has:toggleState.lowtemp, count:numVal('lowtempCount'), type:val('lowtempType'), brand:val('lowtempBrand'), dailyCycles:numVal('lowtempCycles') },
+        wd: { has:toggleState.wd, count:numVal('wdCount'), brand:val('wdBrand'), dailyCycles:numVal('wdCycles') },
+        ultra: { has:toggleState.ultra, count:numVal('ultraCount'), dailyCycles:numVal('ultraCycles') },
+        traceability: val('cssdTraceability'),
+        standard: val('cssdStandard')
+      };
+      break;
+    case 3:
+      assessment.endoscopy = {
+        aerCount: numVal('aerCount'),
+        aerBrand: val('aerBrand'),
+        scopeCount: numVal('scopeCount'),
+        dailyProcedures: numVal('dailyProcedures'),
+        chemistry: val('endoChemistry'),
+        traceability: val('endoTraceability')
+      };
+      break;
+    case 4:
+      assessment.consumables = {
+        chemistry: val('currentChemistry'),
+        ciClasses: getCheckedValues('ciChecks'),
+        ciBrand: val('ciBrand'),
+        hasPCD: val('hasPCD'),
+        hasProteinTest: val('hasProteinTest'),
+        resultRecording: val('resultRecording')
+      };
+      break;
+    case 5:
+      assessment.compliance = {
+        status: getRadioValue('compliance'),
+        auditFindings: val('auditFindings'),
+        challenges: getCheckedValues('challengeChecks'),
+        aspirations: val('aspirations'),
+        bundling: getRadioValue('bundling'),
+        notes: val('additionalNotes')
+      };
+      break;
+  }
+}
+
+/* ──────── Assessment Start ──────── */
+function startAssessment(){
+  assessment = {
+    id: uid(),
+    created: new Date().toISOString(),
+    facility:{}, cssd:{}, endoscopy:{}, consumables:{}, compliance:{}, recommendations:[]
+  };
+  document.getElementById('startScreen').style.display='none';
+  document.getElementById('wizard').style.display='block';
+  showStep(1);
+}
+
+/* ──────── Recommendation Engine ──────── */
+function calcConsumptionSnapshot(a){
+  const DAYS = 22;
+  const ft = a.facility.facilityType||'';
+  const hasCSSD = ft!=='endoscopy';
+  const hasEndo = ft==='endoscopy'||ft==='combined'||ft==='day_surgery';
+
+  const steamCycles = hasCSSD && a.cssd.steam?.has ? a.cssd.steam.dailyCycles||0 : 0;
+  const lowtempCycles = hasCSSD && a.cssd.lowtemp?.has ? a.cssd.lowtemp.dailyCycles||0 : 0;
+  const wdCycles = hasCSSD && a.cssd.wd?.has ? a.cssd.wd.dailyCycles||0 : 0;
+  const ultraCycles = hasCSSD && a.cssd.ultra?.has ? a.cssd.ultra.dailyCycles||0 : 0;
+  const endoProcs = hasEndo ? a.endoscopy?.dailyProcedures||0 : 0;
+
+  const totalSterilCycles = steamCycles + lowtempCycles;
+  // CI estimate: ~1 per cycle for class 5/6 + ~3 per cycle for class 1 (tape on packs)
+  const ciPerMonth = totalSterilCycles > 0 ? totalSterilCycles * DAYS * 2 : 0;
+  // BD tests: 1 per pre-vacuum sterilizer per day
+  const steamCount = hasCSSD && a.cssd.steam?.has ? a.cssd.steam.count||0 : 0;
+  const hasPrevac = hasCSSD && a.cssd.steam?.has && (a.cssd.steam.type==='prevac'||a.cssd.steam.type==='both');
+  const bdTestsMonth = hasPrevac ? steamCount * DAYS : 0;
+  // Chemistry doses: 1 per WD cycle + 1 per ultrasonic cycle
+  const chemDosesMonth = (wdCycles + ultraCycles) * DAYS;
+  // Check if they're missing BD
+  const ciClasses = a.consumables?.ciClasses||[];
+  const noBowieDick = hasPrevac && !ciClasses.includes('2');
+
+  return {
+    workingDays: DAYS,
+    steamCyclesMonth: steamCycles * DAYS,
+    lowtempCyclesMonth: lowtempCycles * DAYS,
+    wdCyclesMonth: wdCycles * DAYS,
+    ultraCyclesMonth: ultraCycles * DAYS,
+    endoProceduresMonth: endoProcs * DAYS,
+    ciPerMonth,
+    bdTestsMonth,
+    chemDosesMonth,
+    noBowieDick
+  };
+}
+
+function generateRecommendations(){
+  collectCurrentStep();
+  const a = assessment;
+  const recs = [];
+  const gaps = [];
+  const ft = a.facility.facilityType||'';
+  const hasCSSD = ft!=='endoscopy';
+  const hasEndo = ft==='endoscopy'||ft==='combined'||ft==='day_surgery';
+  const DAYS = 22; // working days per month
+
+  /* ── Terragene Chemical Indicators ── */
+  if(hasCSSD && (a.cssd.steam?.has || a.cssd.lowtemp?.has)){
+    const ciClasses = a.consumables.ciClasses||[];
+    const steamCycles = a.cssd.steam?.dailyCycles||0;
+    const lowtempCycles = a.cssd.lowtemp?.dailyCycles||0;
+    const totalSterilCycles = steamCycles + lowtempCycles;
+    const hasH2O2 = a.cssd.lowtemp?.has && a.cssd.lowtemp?.type==='h2o2';
+
+    if(!ciClasses.includes('1')){
+      // Steam tape
+      if(a.cssd.steam?.has){
+        recs.push({
+          cat:'Terragene — Sterilization Indicators',
+          product:'Cintape CT22 — Steam Indicator Tape',
+          sku:'CT22_CINT_1_FDA',
+          reason:'Type 1 process indicator tape for sealing packs before steam sterilization. Changes from yellow to dark brown/black when exposed, providing immediate visual confirmation that a pack has been through the sterilizer.',
+          standard:'ISO 11140-1 Type 1 — AS 5369 requires process exposure identification on every pack.',
+          priority:'medium',
+          volume: steamCycles>0 ? `~${steamCycles*3*DAYS} uses/month (est. 3 packs per cycle x ${steamCycles} daily cycles)` : '',
+          flowStep:'packaging'
+        });
+      }
+      // H2O2 tape
+      if(hasH2O2){
+        recs.push({
+          cat:'Terragene — Sterilization Indicators',
+          product:'Cintape CT40 — H2O2 Indicator Tape',
+          sku:'CT40',
+          reason:'Type 1 process indicator tape for hydrogen peroxide sterilization. Changes from purple to green when exposed, confirming the pack has been processed.',
+          standard:'ISO 11140-1 Type 1 — AS 5369 requires process exposure identification.',
+          priority:'medium',
+          volume: lowtempCycles>0 ? `~${lowtempCycles*3*DAYS} uses/month` : '',
+          flowStep:'packaging'
+        });
+      }
+    }
+
+    if(!ciClasses.includes('2') && a.cssd.steam?.has && (a.cssd.steam?.type==='prevac'||a.cssd.steam?.type==='both')){
+      const gap = 'No Bowie-Dick (Type 2) test for pre-vacuum sterilizer — daily air removal test is a mandatory requirement.';
+      gaps.push(gap);
+      recs.push({
+        cat:'Terragene — Sterilization Indicators',
+        product:'Chemdye BD125X/1 — Bowie-Dick Test Pack',
+        sku:'BD125X/1_CHEM_20TZ',
+        reason:'ISO 11140-5 Bowie-Dick test pack with early warning sheet for detecting air removal failures. Run daily in an empty pre-vacuum sterilizer before processing loads to verify the vacuum system is functioning correctly.',
+        standard:'ISO 11140-1 Type 2 / ISO 11140-5 — AS 5369 mandates daily Bowie-Dick testing for pre-vacuum sterilizers.',
+        priority:'high',
+        volume: a.cssd.steam?.count>0 ? `${a.cssd.steam.count} test(s)/day (1 per sterilizer) = ~${a.cssd.steam.count*DAYS}/month` : '1 per sterilizer per day',
+        flowStep:'sterilizer_test'
+      });
+    }
+
+    if(!ciClasses.includes('4')){
+      recs.push({
+        cat:'Terragene — Sterilization Indicators',
+        product:'Chemdye CD29 — Multi-Variable Indicator (Type 4)',
+        sku:'CD29CHEM250/500FDA',
+        reason:'Type 4 multi-variable chemical indicator strips placed inside packs before sterilization. Monitors two or more critical variables (time, temperature, steam presence) to verify conditions were met within the pack.',
+        standard:'ISO 11140-1 Type 4 — recommended for routine in-pack monitoring per AS 5369.',
+        priority:'medium',
+        volume: totalSterilCycles>0 ? `~${totalSterilCycles*DAYS} strips/month (1 per cycle) — 250 double / 500 single strips per box` : '',
+        flowStep:'sterilization'
+      });
+    }
+
+    if(!ciClasses.includes('5')){
+      recs.push({
+        cat:'Terragene — Sterilization Indicators',
+        product:'Integron IT26-1YS — Chemical Integrator (Type 5)',
+        sku:'IT26-1YSINTE200FDA',
+        reason:'Type 5 integrating indicator that reacts to ALL critical sterilization variables. Performance correlates with biological indicator results, making it the most reliable chemical indicator for verifying sterilization conditions were achieved. Suitable for 121°C to 134°C steam cycles.',
+        standard:'ISO 11140-1 Type 5 — AS 5369 recommends integrating indicators for critical load release decisions.',
+        priority:'medium',
+        volume: totalSterilCycles>0 ? `~${totalSterilCycles*DAYS} strips/month — 200 per pack` : '',
+        flowStep:'sterilization'
+      });
+    }
+
+    if(!ciClasses.includes('6')){
+      recs.push({
+        cat:'Terragene — Sterilization Indicators',
+        product:'Integron IT28 — 3-Point Emulating Indicator (Type 6)',
+        sku:'IT28_inte_250',
+        reason:'The highest class of chemical indicator. Cycle-specific Type 6 emulator that reacts to all critical variables for 134°C/3.5 min and 121°C/15 min steam cycles. Provides the closest chemical approximation to biological indicator verification.',
+        standard:'ISO 11140-1 Type 6 — the most precise chemical indicator classification.',
+        priority:'low',
+        volume: totalSterilCycles>0 ? `~${totalSterilCycles*DAYS} strips/month — 250 per pack` : '',
+        flowStep:'sterilization'
+      });
+    }
+  }
+
+  /* ── Terragene Cleaning Verification ── */
+  if(hasCSSD){
+    // Washer-disinfector cleaning indicator
+    if(a.cssd.wd?.has){
+      recs.push({
+        cat:'Terragene — Cleaning Verification',
+        product:'Chemdye CDWA4 "Splat" — Washer-Disinfector Indicator',
+        sku:'CDWA4_CHEM_200',
+        reason:'High-challenge cleaning performance indicator for washer-disinfectors. Placed in the washer to verify the cleaning cycle is effectively removing contamination. Fuchsia test soil is removed during effective cleaning — any remaining colour indicates a cleaning failure.',
+        standard:'AS 5369 requires routine monitoring of washer-disinfector performance.',
+        priority:'medium',
+        volume: a.cssd.wd.dailyCycles>0 ? `Routine testing — 200 per pack` : '',
+        flowStep:'cleaning'
+      });
+    }
+
+    // Ultrasonic cleaning indicator
+    if(a.cssd.ultra?.has){
+      recs.push({
+        cat:'Terragene — Cleaning Verification',
+        product:'Chemdye CDWU — Ultrasonic Cavitation Indicator',
+        sku:'CDWU_CHEM_30',
+        reason:'Monitors ultrasonic cavitation effectiveness to verify your ultrasonic cleaner is performing correctly. Detects all factors affecting cavitation at frequencies >= 35 kHz. Essential for routine performance checks.',
+        standard:'AS 5369 requires validation and monitoring of ultrasonic cleaning processes.',
+        priority:'medium',
+        volume: '30 per pack — use for daily/weekly performance checks',
+        flowStep:'cleaning'
+      });
+    }
+
+    // Protein testing for instruments
+    if(a.consumables.hasProteinTest!=='yes'){
+      const isGap = a.consumables.hasProteinTest==='no';
+      if(isGap) gaps.push('No residual protein testing — cleaning validation is a critical step before sterilization.');
+      recs.push({
+        cat:'Terragene — Cleaning Verification',
+        product:'PRO1 MiCRO — Surface Protein Detection Pen',
+        sku:'PRO1MiCRO',
+        reason:'High-sensitivity pen system for quantifying residual protein on instrument surfaces. Swab the surface, incubate for 7 minutes, and read results visually or with a Bionova auto-reader. Detects inadequate cleaning before instruments enter the sterilizer.',
+        standard:'AS 5369 requires validation and routine monitoring of the cleaning process.',
+        priority: isGap?'high':'medium',
+        volume: '',
+        flowStep:'cleaning_verify'
+      });
+    }
+  }
+
+  /* ── Terragene Endoscopy Protein Testing ── */
+  if(hasEndo && a.consumables.hasProteinTest!=='yes'){
+    recs.push({
+      cat:'Terragene — Endoscopy Verification',
+      product:'Chemdye KPRO2-E250 — Endoscope Protein Testing',
+      sku:'KPRO2-E250',
+      reason:'Hygiene monitoring system designed specifically for endoscopes. A high-absorption swab is passed through the endoscope channel, then placed in a reactive solution to detect as little as 1 microgram of residual protein. Confirms cleaning was effective before disinfection.',
+      standard:'AS 5369 requires cleaning verification for endoscope reprocessing.',
+      priority:'high',
+      volume: `250 tests per kit`,
+      flowStep:'cleaning_verify'
+    });
+    recs.push({
+      cat:'Terragene — Endoscopy Verification',
+      product:'PRO1 ENDO — Quantitative Endoscope Protein System',
+      sku:'PRO1ENDO_CHEM_20',
+      reason:'Advanced quantitative protein detection system for cannulated endoscope channels. Provides results in the 1–50 microgram range with a 0.5 microgram detection limit. Used with Bionova auto-readers for documented, traceable results.',
+      standard:'AS 5369 / ISO 15883 — cleaning validation for endoscope reprocessing.',
+      priority:'medium',
+      volume: '20 tests per pack',
+      flowStep:'cleaning_verify'
+    });
+  }
+
+  /* ── Bionova Cloud (Traceability) ── */
+  const traceability = a.cssd.traceability || a.endoscopy?.traceability || a.consumables.resultRecording || '';
+  const traceChallenges = (a.compliance.challenges||[]).includes('traceability');
+  const poorTraceability = ['none','paper','spreadsheet',''].includes(traceability) || ['none','paper','spreadsheet',''].includes(a.consumables.resultRecording);
+
+  if(poorTraceability || traceChallenges){
+    recs.push({
+      cat:'Bionova Cloud',
+      product:'Terragene Bionova Cloud — Digital Traceability Platform',
+      reason: 'Bionova Cloud provides automated indicator result reading, cloud-based record keeping, and audit-ready reporting. ' +
+        (poorTraceability ? 'Your current tracking method could be significantly enhanced with digital traceability. ' : '') +
+        (traceChallenges ? 'You identified traceability as a key challenge — Bionova Cloud directly addresses this. ' : '') +
+        'Real-time dashboards give management oversight of every sterilization cycle and consumable result.',
+      standard:'AS 5369 requires documented evidence of reprocessing. Bionova Cloud provides automated, tamper-proof digital records that satisfy audit requirements.',
+      priority: traceChallenges?'high':'medium',
+      volume: '',
+      isFeature: true
+    });
+  }
+
+  /* ── Max Range Chemistry (CSSD) ── */
+  if(hasCSSD){
+    const currentChem = (a.consumables.chemistry||'').toLowerCase();
+    const isMaxRange = currentChem.includes('max') || currentChem.includes('zymax') || currentChem.includes('macemark');
+
+    if(!isMaxRange){
+      if(a.cssd.wd?.has){
+        const wdCycles = a.cssd.wd.dailyCycles||0;
+        recs.push({
+          cat:'Max Range Chemistry',
+          product:'ZyMax — Enzymatic Detergent',
+          reason:'ZyMax is a high-performance enzymatic detergent formulated for automated washer-disinfectors. It breaks down protein, blood, and organic material from surgical instruments effectively at low concentrations.',
+          standard:'AS 5369 requires validated cleaning chemistry for automated reprocessing.',
+          priority:'medium',
+          volume: wdCycles>0 ? `Based on ~${wdCycles} daily WD cycles — contact us for dosage calculation` : '',
+          flowStep:'auto_clean'
+        });
+        recs.push({
+          cat:'Max Range Chemistry',
+          product:'DryMax — Rinse & Drying Aid',
+          reason:'DryMax is used in the final rinse stage of washer-disinfectors to promote rapid drying and prevent water spotting on instruments. Proper drying is essential to prevent corrosion and ensure sterility maintenance.',
+          standard:'AS 5369 requires instruments to be thoroughly dried before packaging and sterilization.',
+          priority:'low',
+          volume: wdCycles>0 ? `Based on ~${wdCycles} daily WD cycles — contact us for dosage calculation` : '',
+          flowStep:'auto_clean'
+        });
+      }
+
+      recs.push({
+        cat:'Max Range Chemistry',
+        product:'ManualMax — Enzymatic Manual Washing Detergent',
+        reason:'ManualMax is an enzymatic detergent for manual pre-cleaning and soaking of surgical instruments. Essential for the initial decontamination step before automated processing.',
+        standard:'AS 5369 requires a validated manual cleaning process as part of the reprocessing workflow.',
+        priority:'medium',
+        volume: '',
+        flowStep:'manual_clean'
+      });
+
+      if(a.cssd.ultra?.has){
+        recs.push({
+          cat:'Max Range Chemistry',
+          product:'SonicMax — Ultrasonic Cleaning Detergent',
+          reason:'SonicMax is specifically formulated for ultrasonic cleaners, working synergistically with cavitation to remove contaminants from complex instrument geometries and lumens.',
+          standard:'AS 5369 requires validated chemistry for ultrasonic cleaning processes.',
+          priority:'medium',
+          volume: a.cssd.ultra.dailyCycles>0 ? `Based on ~${a.cssd.ultra.dailyCycles} daily ultrasonic cycles` : '',
+          flowStep:'auto_clean'
+        });
+      }
+    }
+  }
+
+  /* ── Meditech (Endoscopy) ── */
+  if(hasEndo){
+    const currentEndoChem = (a.endoscopy?.chemistry||'').toLowerCase();
+    const isMeditech = currentEndoChem.includes('meditech') || currentEndoChem.includes('stageone') || currentEndoChem.includes('aquablue');
+    const procs = a.endoscopy?.dailyProcedures||0;
+
+    if(!isMeditech){
+      recs.push({
+        cat:'Meditech Endoscopy',
+        product:'StageOne — Endoscope Pre-Cleaning Solution',
+        reason:'StageOne is used for bedside pre-cleaning of endoscopes immediately after the procedure. Prompt pre-cleaning prevents biofilm formation and organic material from drying onto the endoscope channels.',
+        standard:'AS 5369 requires immediate pre-cleaning of endoscopes at the point of use.',
+        priority:'medium',
+        volume: procs>0 ? `~${procs*DAYS} units/month (${procs} daily procedures)` : '',
+        flowStep:'endo_preclean'
+      });
+      recs.push({
+        cat:'Meditech Endoscopy',
+        product:'AquaBlue — Endoscope Cleaning Solution',
+        reason:'AquaBlue is a dedicated endoscope cleaning detergent for use in manual and automated reprocessing. Formulated for compatibility with all major endoscope brands.',
+        standard:'AS 5369 requires validated cleaning chemistry specific to endoscope reprocessing.',
+        priority:'medium',
+        volume: procs>0 ? `Based on ~${procs} daily procedures — contact us for volume calculation` : '',
+        flowStep:'endo_clean'
+      });
+      recs.push({
+        cat:'Meditech Endoscopy',
+        product:'ProTech Tip Protectors',
+        reason:'ProTech tip protectors safeguard delicate endoscope distal tips during transport and storage, preventing costly damage. Endoscope tip repair is one of the most common and expensive maintenance items.',
+        standard:'Best practice for endoscope handling and transport — protects your investment.',
+        priority:'low',
+        volume: procs>0 ? `~${a.endoscopy?.scopeCount||procs} protectors in rotation` : '',
+        flowStep:'endo_storage'
+      });
+    }
+  }
+
+  assessment.recommendations = recs;
+  assessment.gaps = gaps;
+  renderRecommendations(recs, gaps);
+}
+
+function renderProcessFlow(recs, a){
+  const ft = a.facility.facilityType||'';
+  const hasCSSD = ft!=='endoscopy';
+  const hasEndo = ft==='endoscopy'||ft==='combined'||ft==='day_surgery';
+
+  // Define workflow steps and map recommended products to them
+  const steps = [];
+  const pName = r => r.product.split('—')[0].trim();
+
+  if(hasCSSD){
+    steps.push({
+      title:'Manual Pre-Clean', icon:'1',
+      products: recs.filter(r=>r.flowStep==='manual_clean').map(r=>({name:pName(r), sku:r.sku, type:'chem'}))
+    });
+    steps.push({
+      title:'Automated Cleaning', icon:'2',
+      products: [
+        ...recs.filter(r=>r.flowStep==='auto_clean').map(r=>({name:pName(r), sku:r.sku, type:'chem'})),
+        ...recs.filter(r=>r.flowStep==='cleaning').map(r=>({name:pName(r), sku:r.sku, type:'default'}))
+      ]
+    });
+    steps.push({
+      title:'Cleaning Verification', icon:'3',
+      products: recs.filter(r=>r.flowStep==='cleaning_verify' && r.sku!=='KPRO2-E250' && r.sku!=='PRO1ENDO_CHEM_20').map(r=>({name:pName(r), sku:r.sku, type:'default'}))
+    });
+    steps.push({
+      title:'Packaging', icon:'4',
+      products: recs.filter(r=>r.flowStep==='packaging').map(r=>({name:pName(r), sku:r.sku, type:'default'}))
+    });
+    steps.push({
+      title:'Sterilizer Test', icon:'5',
+      products: recs.filter(r=>r.flowStep==='sterilizer_test').map(r=>({name:pName(r), sku:r.sku, type:'default'}))
+    });
+    steps.push({
+      title:'Sterilization', icon:'6',
+      products: recs.filter(r=>r.flowStep==='sterilization').map(r=>({name:pName(r), sku:r.sku, type:'default'}))
+    });
+  }
+
+  if(hasEndo){
+    const endoSteps = [];
+    endoSteps.push({
+      title:'Scope Pre-Clean', icon: hasCSSD?'E1':'1',
+      products: recs.filter(r=>r.flowStep==='endo_preclean').map(r=>({name:pName(r), sku:r.sku, type:'endo'}))
+    });
+    endoSteps.push({
+      title:'Scope Cleaning', icon: hasCSSD?'E2':'2',
+      products: recs.filter(r=>r.flowStep==='endo_clean').map(r=>({name:pName(r), sku:r.sku, type:'endo'}))
+    });
+    endoSteps.push({
+      title:'Scope Verification', icon: hasCSSD?'E3':'3',
+      products: recs.filter(r=>r.flowStep==='cleaning_verify' && (r.sku==='KPRO2-E250'||r.sku==='PRO1ENDO_CHEM_20')).map(r=>({name:pName(r), sku:r.sku, type:'endo'}))
+    });
+    endoSteps.push({
+      title:'Storage & Protection', icon: hasCSSD?'E4':'4',
+      products: recs.filter(r=>r.flowStep==='endo_storage').map(r=>({name:pName(r), sku:r.sku, type:'endo'}))
+    });
+    steps.push(...endoSteps);
+  }
+
+  // Only render steps that have products
+  const activeSteps = steps.filter(s=>s.products.length>0);
+  if(activeSteps.length===0) return '';
+
+  let html = `<div class="process-flow"><div class="card">`;
+  html += `<div class="card-header" style="background:var(--navy);color:var(--white)">Your Reprocessing Workflow — Where Each Product Fits</div>`;
+  html += `<div class="card-body">`;
+
+  if(hasCSSD){
+    const cssdSteps = activeSteps.filter(s=>!String(s.icon).startsWith('E'));
+    if(cssdSteps.length>0){
+      if(hasEndo) html += `<div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">CSSD Workflow</div>`;
+      html += `<div class="flow-steps">`;
+      cssdSteps.forEach((s,i)=>{
+        if(i>0) html += `<div class="flow-arrow">&#8594;</div>`;
+        html += `<div class="flow-step">
+          <div class="flow-step-header">
+            <div class="flow-num">${s.icon}</div>
+            <div><div class="flow-title">${s.title}</div></div>
+          </div>
+          <div class="flow-products">
+            ${s.products.map(p=>`<div class="flow-product ${p.type}"><div>${esc(p.name)}</div><div class="flow-product-sku">${esc(p.sku||'')}</div></div>`).join('')}
+          </div>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+  }
+
+  if(hasEndo){
+    const endoSteps = activeSteps.filter(s=>String(s.icon).startsWith('E') || (!hasCSSD && !String(s.icon).startsWith('E')));
+    if(endoSteps.length>0){
+      if(hasCSSD) html += `<div style="font-size:12px;font-weight:700;color:var(--purple);margin:16px 0 8px;text-transform:uppercase;letter-spacing:1px">Endoscopy Workflow</div>`;
+      html += `<div class="flow-steps">`;
+      endoSteps.forEach((s,i)=>{
+        if(i>0) html += `<div class="flow-arrow">&#8594;</div>`;
+        html += `<div class="flow-step">
+          <div class="flow-step-header">
+            <div class="flow-num" style="background:var(--purple)">${s.icon}</div>
+            <div><div class="flow-title" style="color:var(--purple)">${s.title}</div></div>
+          </div>
+          <div class="flow-products">
+            ${s.products.map(p=>`<div class="flow-product endo"><div>${esc(p.name)}</div><div class="flow-product-sku">${esc(p.sku||'')}</div></div>`).join('')}
+          </div>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+  }
+
+  html += `</div></div></div>`;
+  return html;
+}
+
+function renderRecommendations(recs, gaps){
+  let html = '';
+
+  // Facility summary
+  const a = assessment;
+  html += `<div class="card"><div class="card-header">Assessment Summary</div><div class="card-body">`;
+  html += `<div class="summary-section"><h3>Facility</h3>`;
+  html += `<div class="summary-row"><span class="label">Facility</span><span class="value">${esc(a.facility.name)||'—'}</span></div>`;
+  html += `<div class="summary-row"><span class="label">Contact</span><span class="value">${esc(a.facility.contactPerson)||'—'} ${a.facility.contactEmail?'('+esc(a.facility.contactEmail)+')':''}</span></div>`;
+  html += `<div class="summary-row"><span class="label">Type</span><span class="value">${formatFacilityType(a.facility.facilityType)}</span></div>`;
+  html += `<div class="summary-row"><span class="label">Staff</span><span class="value">${a.facility.staffCount||'—'}</span></div>`;
+  html += `</div>`;
+
+  // Equipment summary
+  if(a.facility.facilityType!=='endoscopy'){
+    html += `<div class="summary-section"><h3>CSSD Equipment</h3>`;
+    if(a.cssd.steam?.has) html += `<div class="summary-row"><span class="label">Steam Sterilizers</span><span class="value">${a.cssd.steam.count}x ${esc(a.cssd.steam.brand)} — ~${a.cssd.steam.dailyCycles} cycles/day</span></div>`;
+    if(a.cssd.lowtemp?.has) html += `<div class="summary-row"><span class="label">Low-Temp Sterilizers</span><span class="value">${a.cssd.lowtemp.count}x ${esc(a.cssd.lowtemp.brand)} (${a.cssd.lowtemp.type.toUpperCase()}) — ~${a.cssd.lowtemp.dailyCycles} cycles/day</span></div>`;
+    if(a.cssd.wd?.has) html += `<div class="summary-row"><span class="label">Washer-Disinfectors</span><span class="value">${a.cssd.wd.count}x ${esc(a.cssd.wd.brand)} — ~${a.cssd.wd.dailyCycles} cycles/day</span></div>`;
+    if(a.cssd.ultra?.has) html += `<div class="summary-row"><span class="label">Ultrasonic Cleaners</span><span class="value">${a.cssd.ultra.count}x — ~${a.cssd.ultra.dailyCycles} cycles/day</span></div>`;
+    html += `<div class="summary-row"><span class="label">Traceability</span><span class="value">${formatTraceability(a.cssd.traceability)}</span></div>`;
+    html += `</div>`;
+  }
+
+  if(['endoscopy','combined','day_surgery'].includes(a.facility.facilityType)){
+    html += `<div class="summary-section"><h3>Endoscopy</h3>`;
+    html += `<div class="summary-row"><span class="label">AERs</span><span class="value">${a.endoscopy.aerCount||0}x ${esc(a.endoscopy.aerBrand)}</span></div>`;
+    html += `<div class="summary-row"><span class="label">Endoscopes</span><span class="value">${a.endoscopy.scopeCount||0}</span></div>`;
+    html += `<div class="summary-row"><span class="label">Daily Procedures</span><span class="value">~${a.endoscopy.dailyProcedures||0}</span></div>`;
+    html += `<div class="summary-row"><span class="label">Current Chemistry</span><span class="value">${esc(a.endoscopy.chemistry)||'—'}</span></div>`;
+    html += `</div>`;
+  }
+
+  html += `</div></div>`;
+
+  // Consumption Snapshot
+  const snap = calcConsumptionSnapshot(a);
+  html += `<div class="snapshot-card">
+    <div class="snapshot-header">
+      <span>Monthly Consumption Snapshot</span>
+      ${a.compliance.bundling ? `<span class="bundling-badge bundling-${a.compliance.bundling==='yes'?'yes':a.compliance.bundling==='maybe'?'maybe':'no'}">${a.compliance.bundling==='yes'?'Bundling: Interested':a.compliance.bundling==='maybe'?'Bundling: Wants Info':'Bundling: Not Now'}</span>` : ''}
+    </div>
+    <div class="snapshot-body">
+      <div class="snapshot-grid">
+        ${snap.steamCyclesMonth>0?`<div class="snapshot-item"><div class="snap-value">${snap.steamCyclesMonth.toLocaleString()}</div><div class="snap-label">Steam Sterilizer Cycles / Month</div></div>`:''}
+        ${snap.lowtempCyclesMonth>0?`<div class="snapshot-item"><div class="snap-value">${snap.lowtempCyclesMonth.toLocaleString()}</div><div class="snap-label">Low-Temp Cycles / Month</div></div>`:''}
+        ${snap.wdCyclesMonth>0?`<div class="snapshot-item"><div class="snap-value">${snap.wdCyclesMonth.toLocaleString()}</div><div class="snap-label">WD Cycles / Month</div></div>`:''}
+        ${snap.ultraCyclesMonth>0?`<div class="snapshot-item"><div class="snap-value">${snap.ultraCyclesMonth.toLocaleString()}</div><div class="snap-label">Ultrasonic Cycles / Month</div></div>`:''}
+        ${snap.endoProceduresMonth>0?`<div class="snapshot-item"><div class="snap-value">${snap.endoProceduresMonth.toLocaleString()}</div><div class="snap-label">Endoscopy Procedures / Month</div></div>`:''}
+        ${snap.ciPerMonth>0?`<div class="snapshot-item highlight"><div class="snap-value">~${snap.ciPerMonth.toLocaleString()}</div><div class="snap-label">Est. Chemical Indicators / Month</div></div>`:''}
+        ${snap.bdTestsMonth>0?`<div class="snapshot-item ${snap.noBowieDick?'warn':''}"><div class="snap-value">${snap.bdTestsMonth}</div><div class="snap-label">Bowie-Dick Tests / Month</div></div>`:''}
+        ${snap.chemDosesMonth>0?`<div class="snapshot-item highlight"><div class="snap-value">~${snap.chemDosesMonth.toLocaleString()}</div><div class="snap-label">Est. Chemistry Doses / Month</div></div>`:''}
+      </div>
+      <div style="margin-top:12px;font-size:12px;color:var(--gray-500)">
+        Based on ${snap.workingDays} working days/month. Volumes are estimates for quoting purposes.
+      </div>
+    </div>
+  </div>`;
+
+  // Process Flow Visual
+  html += renderProcessFlow(recs, a);
+
+  // Gaps alert
+  if(gaps.length>0){
+    html += `<div class="gap-alert"><h3>&#9888; Compliance Gaps Identified</h3><ul>`;
+    gaps.forEach(g => html+=`<li>${esc(g)}</li>`);
+    html += `</ul></div>`;
+  }
+
+  // Bionova Cloud feature card (if recommended)
+  const bionovaRec = recs.find(r=>r.isFeature);
+  if(bionovaRec){
+    html += `<div class="feature-card">
+      <h3>Recommended: Bionova Cloud</h3>
+      <p>${esc(bionovaRec.reason)}</p>
+      <div class="feature-list">
+        <span class="feature-tag">Automated Result Reading</span>
+        <span class="feature-tag">Cloud-Based Records</span>
+        <span class="feature-tag">Audit-Ready Reports</span>
+        <span class="feature-tag">Real-Time Dashboards</span>
+        <span class="feature-tag">Full Traceability</span>
+      </div>
+    </div>`;
+  }
+
+  // Grouped recommendation cards
+  const nonFeatureRecs = recs.filter(r=>!r.isFeature);
+  let currentCat = '';
+  nonFeatureRecs.forEach(r=>{
+    if(r.cat!==currentCat){
+      currentCat=r.cat;
+      html+=`<div class="rec-category">${esc(r.cat)}</div>`;
+    }
+    html+=`<div class="rec-card ${r.priority}">
+      <div class="rec-card-header">
+        <div><h3>${esc(r.product)}</h3>${r.sku?`<div class="rec-sku">SKU: ${esc(r.sku)}</div>`:''}</div>
+        <span class="badge badge-${r.priority==='high'?'red':r.priority==='medium'?'amber':'blue'}">${r.priority}</span>
+      </div>
+      <div class="rec-card-body">
+        <p>${esc(r.reason)}</p>
+        <div class="rec-standard">${esc(r.standard)}</div>
+        ${r.volume?`<div class="rec-volume">Estimated volume: ${esc(r.volume)}</div>`:''}
+      </div>
+    </div>`;
+  });
+
+  if(nonFeatureRecs.length===0 && !bionovaRec){
+    html += `<div class="card"><div class="card-body" style="text-align:center;padding:40px">
+      <h3 style="color:var(--green)">Looking Good!</h3>
+      <p style="color:var(--gray-500)">Based on your responses, your facility appears well-equipped with current consumables. Contact us to discuss optimisation opportunities.</p>
+    </div></div>`;
+  }
+
+  // Action buttons
+  html += `<div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap" class="no-print">
+    <button class="btn btn-success" onclick="emailResults()" style="flex:1;min-width:200px;justify-content:center">Email Results to Sales</button>
+    <button class="btn btn-secondary" onclick="window.print()" style="flex:1;min-width:200px;justify-content:center">Print Summary</button>
+    <button class="btn btn-primary" onclick="exportJSON()" style="flex:1;min-width:200px;justify-content:center">Export JSON</button>
+  </div>`;
+
+  document.getElementById('recommendationsOutput').innerHTML=html;
+}
+
+/* ──────── Formatting ──────── */
+function formatFacilityType(ft){
+  const map = {hospital_cssd:'Hospital CSSD',day_surgery:'Day Surgery',dental:'Dental Practice',endoscopy:'Endoscopy Unit',combined:'Combined CSSD + Endoscopy'};
+  return map[ft]||'—';
+}
+function formatTraceability(t){
+  const map = {none:'No formal tracking',paper:'Paper-based logs',spreadsheet:'Spreadsheets',digital:'Digital system'};
+  return map[t]||'—';
+}
+
+/* ──────── Email ──────── */
+function emailResults(){
+  collectCurrentStep();
+  if(currentStep!==6) generateRecommendations();
+  const a = assessment;
+  const nl = '%0D%0A';
+  const hr = '────────────────────────────────';
+  let body = '';
+
+  body += `MACEMARK TECHNOLOGY — FACILITY ASSESSMENT${nl}`;
+  body += `Date: ${new Date().toLocaleDateString('en-AU')}${nl}`;
+  body += `${hr}${nl}${nl}`;
+
+  body += `FACILITY PROFILE${nl}`;
+  body += `Name: ${a.facility.name||'—'}${nl}`;
+  body += `Contact: ${a.facility.contactPerson||'—'}${nl}`;
+  body += `Email: ${a.facility.contactEmail||'—'}${nl}`;
+  body += `Phone: ${a.facility.contactPhone||'—'}${nl}`;
+  body += `Type: ${formatFacilityType(a.facility.facilityType)}${nl}`;
+  body += `Staff: ${a.facility.staffCount||'—'}${nl}${nl}`;
+
+  // Quick Consumption Snapshot
+  const snap = calcConsumptionSnapshot(a);
+  body += `${hr}${nl}`;
+  body += `MONTHLY CONSUMPTION SNAPSHOT (est. ${snap.workingDays} working days)${nl}`;
+  body += `${hr}${nl}`;
+  if(snap.steamCyclesMonth>0) body += `  Steam Sterilizer Cycles:  ${snap.steamCyclesMonth.toLocaleString()}/month${nl}`;
+  if(snap.lowtempCyclesMonth>0) body += `  Low-Temp Cycles:          ${snap.lowtempCyclesMonth.toLocaleString()}/month${nl}`;
+  if(snap.wdCyclesMonth>0) body += `  WD Cycles:                ${snap.wdCyclesMonth.toLocaleString()}/month${nl}`;
+  if(snap.ultraCyclesMonth>0) body += `  Ultrasonic Cycles:        ${snap.ultraCyclesMonth.toLocaleString()}/month${nl}`;
+  if(snap.endoProceduresMonth>0) body += `  Endoscopy Procedures:     ${snap.endoProceduresMonth.toLocaleString()}/month${nl}`;
+  if(snap.ciPerMonth>0) body += `  Est. Chemical Indicators: ~${snap.ciPerMonth.toLocaleString()}/month${nl}`;
+  if(snap.bdTestsMonth>0) body += `  Bowie-Dick Tests:         ${snap.bdTestsMonth}/month${nl}`;
+  if(snap.chemDosesMonth>0) body += `  Est. Chemistry Doses:     ~${snap.chemDosesMonth.toLocaleString()}/month${nl}`;
+  const bundleMap = {yes:'YES — Interested',maybe:'Wants More Info',no:'Not at this time'};
+  body += `  Bundled Supply Interest:  ${bundleMap[a.compliance?.bundling]||'Not answered'}${nl}`;
+  body += nl;
+
+  if(a.facility.facilityType!=='endoscopy' && a.cssd){
+    body += `CSSD EQUIPMENT${nl}`;
+    if(a.cssd.steam?.has) body += `Steam Sterilizers: ${a.cssd.steam.count}x ${a.cssd.steam.brand} (${a.cssd.steam.type}) ~${a.cssd.steam.dailyCycles} cycles/day${nl}`;
+    if(a.cssd.lowtemp?.has) body += `Low-Temp Sterilizers: ${a.cssd.lowtemp.count}x ${a.cssd.lowtemp.brand} (${a.cssd.lowtemp.type}) ~${a.cssd.lowtemp.dailyCycles} cycles/day${nl}`;
+    if(a.cssd.wd?.has) body += `Washer-Disinfectors: ${a.cssd.wd.count}x ${a.cssd.wd.brand} ~${a.cssd.wd.dailyCycles} cycles/day${nl}`;
+    if(a.cssd.ultra?.has) body += `Ultrasonic Cleaners: ${a.cssd.ultra.count}x ~${a.cssd.ultra.dailyCycles} cycles/day${nl}`;
+    body += `Traceability: ${formatTraceability(a.cssd.traceability)}${nl}`;
+    if(a.cssd.standard) body += `Standard/Goals: ${a.cssd.standard}${nl}`;
+    body += nl;
+  }
+
+  if(['endoscopy','combined','day_surgery'].includes(a.facility.facilityType) && a.endoscopy){
+    body += `ENDOSCOPY${nl}`;
+    body += `AERs: ${a.endoscopy.aerCount||0}x ${a.endoscopy.aerBrand||'—'}${nl}`;
+    body += `Endoscopes: ${a.endoscopy.scopeCount||0}${nl}`;
+    body += `Daily Procedures: ~${a.endoscopy.dailyProcedures||0}${nl}`;
+    body += `Current Chemistry: ${a.endoscopy.chemistry||'—'}${nl}`;
+    body += `Traceability: ${formatTraceability(a.endoscopy?.traceability)}${nl}${nl}`;
+  }
+
+  body += `CURRENT CONSUMABLES${nl}`;
+  body += `Chemistry: ${a.consumables.chemistry||'—'}${nl}`;
+  body += `CI Classes: ${(a.consumables.ciClasses||[]).join(', ')||'None'}${nl}`;
+  body += `CI Brand: ${a.consumables.ciBrand||'—'}${nl}`;
+  body += `PCDs: ${a.consumables.hasPCD||'—'}${nl}`;
+  body += `Protein Testing: ${a.consumables.hasProteinTest||'—'}${nl}`;
+  body += `Result Recording: ${formatTraceability(a.consumables.resultRecording)}${nl}${nl}`;
+
+  body += `COMPLIANCE${nl}`;
+  body += `AS 5369 Status: ${a.compliance.status||'—'}${nl}`;
+  if(a.compliance.auditFindings) body += `Audit Findings: ${a.compliance.auditFindings}${nl}`;
+  if((a.compliance.challenges||[]).length>0) body += `Challenges: ${a.compliance.challenges.join(', ')}${nl}`;
+  if(a.compliance.aspirations) body += `Goals: ${a.compliance.aspirations}${nl}`;
+  if(a.compliance.notes) body += `Notes: ${a.compliance.notes}${nl}`;
+  body += nl;
+
+  if((a.gaps||[]).length>0){
+    body += `⚠ COMPLIANCE GAPS${nl}`;
+    a.gaps.forEach(g => body += `• ${g}${nl}`);
+    body += nl;
+  }
+
+  body += `${hr}${nl}RECOMMENDATIONS${nl}${hr}${nl}${nl}`;
+  let cat='';
+  (a.recommendations||[]).forEach(r=>{
+    if(r.cat!==cat){ cat=r.cat; body+=`--- ${r.cat} ---${nl}`; }
+    body += `[${r.priority.toUpperCase()}] ${r.product}${nl}`;
+    body += `${r.reason}${nl}`;
+    body += `Standard: ${r.standard}${nl}`;
+    if(r.volume) body += `Volume: ${r.volume}${nl}`;
+    body += nl;
+  });
+
+  const subject = encodeURIComponent(`Facility Assessment — ${a.facility.name||'New Assessment'} — ${new Date().toLocaleDateString('en-AU')}`);
+
+  // mailto has URL length limits (~2000 chars). If body is very long, truncate with a note.
+  let encodedBody = body;
+  const mailto = `mailto:sales@sess.com.au?subject=${subject}&body=${encodedBody}`;
+
+  // Try mailto first
+  window.location.href = mailto;
+}
+
+/* ──────── Export JSON ──────── */
+function exportJSON(){
+  collectCurrentStep();
+  if(currentStep!==6) generateRecommendations();
+  const blob = new Blob([JSON.stringify(assessment, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `assessment-${(assessment.facility.name||'export').replace(/[^a-zA-Z0-9]/g,'-')}-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ──────── Init ──────── */
+document.getElementById('headerInfo').textContent = new Date().toLocaleDateString('en-AU');
+</script>
+</body>
+</html>
