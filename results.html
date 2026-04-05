@@ -6,161 +6,382 @@
 <title>Macemark — Assessment Results</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--navy:#1b3a5c;--blue:#2563eb;--green:#057a55;--green-light:#d1fae5;--amber:#b45309;--amber-light:#fef3c7;--red:#c81e1e;--red-light:#fde8e8;--gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-400:#9ca3af;--gray-500:#6b7280;--gray-700:#374151;--gray-800:#1f2937;--white:#fff;--radius:8px;--shadow:0 1px 3px rgba(0,0,0,.1)}
+:root{--navy:#1b3a5c;--navy-dark:#0f2640;--blue:#2563eb;--blue-light:#dbeafe;--green:#057a55;--green-light:#d1fae5;--amber:#b45309;--amber-light:#fef3c7;--red:#c81e1e;--red-light:#fde8e8;--purple:#6d28d9;--gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-300:#d1d5db;--gray-400:#9ca3af;--gray-500:#6b7280;--gray-600:#4b5563;--gray-700:#374151;--gray-800:#1f2937;--white:#fff;--radius:8px;--shadow:0 1px 3px rgba(0,0,0,.1)}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--gray-50);color:var(--gray-800);line-height:1.5}
 header{background:var(--navy);color:var(--white);padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
 header h1{font-size:17px;font-weight:700;letter-spacing:3px;text-transform:uppercase}
 header .subtitle{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
-main{max-width:1000px;margin:0 auto;padding:20px}
-.toolbar{display:flex;gap:12px;margin-bottom:20px;align-items:center;flex-wrap:wrap}
-.toolbar input{padding:9px 12px;border:1px solid var(--gray-200);border-radius:var(--radius);font-size:14px;flex:1;min-width:200px}
-.toolbar input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
-.count{font-size:13px;color:var(--gray-500)}
-.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden;cursor:pointer;transition:box-shadow .15s}
-.card:hover{box-shadow:0 4px 12px rgba(0,0,0,.12)}
-.card-row{display:flex;align-items:center;padding:14px 16px;gap:16px}
-.card-row .facility{font-weight:600;font-size:15px;flex:1;min-width:0}
-.card-row .type{font-size:12px;color:var(--gray-500);background:var(--gray-100);padding:3px 10px;border-radius:12px;white-space:nowrap}
-.card-row .date{font-size:12px;color:var(--gray-400);white-space:nowrap}
-.card-row .contact{font-size:13px;color:var(--gray-500)}
-.badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
+header a{color:rgba(255,255,255,.7);font-size:13px;text-decoration:none}
+header a:hover{color:var(--white)}
+main{max-width:1100px;margin:0 auto;padding:20px}
+
+/* Stats bar */
+.stats{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.stat-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 20px;flex:1;min-width:140px}
+.stat-value{font-size:28px;font-weight:700;color:var(--navy)}
+.stat-label{font-size:12px;color:var(--gray-500);text-transform:uppercase;letter-spacing:1px}
+
+/* Toolbar */
+.toolbar{display:flex;gap:12px;margin-bottom:16px;align-items:center;flex-wrap:wrap}
+.toolbar input,.toolbar select{padding:9px 12px;border:1px solid var(--gray-200);border-radius:var(--radius);font-size:14px;font-family:inherit;background:var(--white)}
+.toolbar input{flex:1;min-width:200px}
+.toolbar input:focus,.toolbar select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
+.count{font-size:13px;color:var(--gray-500);white-space:nowrap}
+
+/* Table */
+.table-wrap{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:14px}
+thead{background:var(--navy);color:var(--white)}
+th{padding:10px 14px;text-align:left;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid var(--gray-100)}
+tr:hover td{background:var(--gray-50)}
+tr{cursor:pointer}
+.badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap;display:inline-block}
 .badge-high{background:var(--red-light);color:var(--red)}
 .badge-gaps{background:var(--amber-light);color:var(--amber)}
 .badge-ok{background:var(--green-light);color:var(--green)}
-.detail{max-height:0;overflow:hidden;transition:max-height .3s ease}
-.detail.open{max-height:2000px}
-.detail-body{padding:0 16px 16px;border-top:1px solid var(--gray-100)}
-.detail-body pre{white-space:pre-wrap;font-size:13px;line-height:1.6;color:var(--gray-700);background:var(--gray-50);padding:12px;border-radius:var(--radius);margin-top:12px;max-height:500px;overflow-y:auto}
+.badge-type{background:var(--blue-light);color:var(--blue)}
+.td-name{font-weight:600}
+.td-contact{color:var(--gray-500);font-size:13px}
+.td-date{color:var(--gray-400);font-size:13px;white-space:nowrap}
+
+/* Detail view (overlay) */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;overflow-y:auto;padding:20px}
+.overlay.open{display:flex;justify-content:center;align-items:flex-start}
+.detail-panel{background:var(--white);border-radius:var(--radius);box-shadow:0 20px 60px rgba(0,0,0,.2);max-width:800px;width:100%;margin:40px auto;overflow:hidden}
+.detail-header{background:var(--navy);color:var(--white);padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.detail-header h2{font-size:16px;font-weight:700}
+.detail-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:24px;cursor:pointer;padding:4px 8px}
+.detail-close:hover{color:var(--white)}
+.detail-body{padding:20px}
+.detail-section{margin-bottom:20px}
+.detail-section h3{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid var(--gray-100);padding-bottom:4px}
+.detail-grid{display:grid;grid-template-columns:160px 1fr;gap:4px 16px;font-size:14px}
+.detail-grid .label{color:var(--gray-500);font-weight:500}
+.detail-grid .value{color:var(--gray-800);font-weight:600}
+.detail-gaps{background:var(--red-light);border-left:4px solid var(--red);padding:10px 14px;border-radius:0 var(--radius) var(--radius) 0;margin-bottom:12px}
+.detail-gaps h4{color:var(--red);font-size:13px;margin-bottom:4px}
+.detail-gaps ul{margin-left:16px;font-size:13px;color:var(--gray-700)}
+.detail-rec{padding:8px 12px;border-left:3px solid var(--blue);background:var(--gray-50);border-radius:0 var(--radius) var(--radius) 0;margin-bottom:6px;font-size:13px}
+.detail-rec.high{border-left-color:var(--red)}
+.detail-rec.medium{border-left-color:var(--amber)}
+.detail-rec .rec-name{font-weight:600}
+.detail-rec .rec-reason{color:var(--gray-600);margin-top:2px}
+.detail-actions{display:flex;gap:12px;padding:16px 20px;border-top:1px solid var(--gray-100);background:var(--gray-50)}
+.btn{padding:9px 18px;border-radius:var(--radius);border:none;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-primary{background:var(--blue);color:var(--white)}
+.btn-secondary{background:var(--white);color:var(--gray-700);border:1px solid var(--gray-200)}
+
+/* Empty state */
 .empty{text-align:center;padding:60px 20px;color:var(--gray-400)}
-.empty h2{margin-bottom:8px}
+.empty h2{margin-bottom:8px;color:var(--gray-500)}
 .setup-info{background:var(--amber-light);border-left:4px solid var(--amber);padding:16px;border-radius:0 var(--radius) var(--radius) 0;margin-bottom:20px;font-size:14px}
 .setup-info code{background:rgba(0,0,0,.06);padding:2px 6px;border-radius:4px;font-size:13px}
-a{color:var(--blue)}
+
+/* Print */
+@media print{
+  header,.toolbar,.stats,.detail-actions,.detail-close{display:none!important}
+  .overlay{position:static;background:none;padding:0}
+  .detail-panel{box-shadow:none;margin:0}
+}
+
+/* Responsive */
+@media(max-width:768px){
+  .detail-grid{grid-template-columns:1fr;gap:2px}
+  .detail-grid .label{color:var(--gray-400);font-size:12px}
+  th:nth-child(n+4),td:nth-child(n+4){display:none}
+}
 </style>
 </head>
 <body>
 <header>
   <div>
     <h1>Macemark Technology</h1>
-    <div class="subtitle">Assessment Results</div>
+    <div class="subtitle">Assessment Results Dashboard</div>
   </div>
-  <a href="index.html" style="color:rgba(255,255,255,.7);font-size:13px;text-decoration:none">&larr; Back to Assessment Tool</a>
+  <a href="index.html">&larr; New Assessment</a>
 </header>
 
 <main>
   <div id="setupBanner" class="setup-info" style="display:none">
-    <strong>Setup Required:</strong> To view submitted results, configure the <code>SHEET_URL</code> in this file with your published Google Sheet CSV URL. See the setup guide in the repository README.
+    <strong>Setup Required:</strong> Configure <code>SUPABASE_URL</code> and <code>SUPABASE_KEY</code> in this file. See setup instructions in the repository.
+  </div>
+
+  <div class="stats" id="statsBar">
+    <div class="stat-card"><div class="stat-value" id="statTotal">—</div><div class="stat-label">Total Assessments</div></div>
+    <div class="stat-card"><div class="stat-value" id="statGaps">—</div><div class="stat-label">With Gaps</div></div>
+    <div class="stat-card"><div class="stat-value" id="statBundling">—</div><div class="stat-label">Bundling Interest</div></div>
+    <div class="stat-card"><div class="stat-value" id="statRecent">—</div><div class="stat-label">Last 7 Days</div></div>
   </div>
 
   <div class="toolbar">
-    <input type="text" id="searchInput" placeholder="Search by facility name, contact, or type..." oninput="filterResults()">
+    <input type="text" id="searchInput" placeholder="Search facility, contact, email..." oninput="filterResults()">
+    <select id="typeFilter" onchange="filterResults()">
+      <option value="">All Types</option>
+      <option value="hospital_cssd">Hospital CSSD</option>
+      <option value="day_surgery">Day Surgery</option>
+      <option value="dental">Dental</option>
+      <option value="endoscopy">Endoscopy</option>
+      <option value="combined">Combined</option>
+    </select>
     <div class="count" id="resultCount"></div>
   </div>
 
-  <div id="resultsList"></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Facility</th>
+          <th>Contact</th>
+          <th>Type</th>
+          <th>Gaps</th>
+          <th>Recs</th>
+          <th>Bundling</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="7" class="empty"><p>Loading...</p></td></tr>
+      </tbody>
+    </table>
+  </div>
 </main>
 
+<!-- Detail overlay -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-panel">
+    <div class="detail-header">
+      <h2 id="detailTitle">Assessment Detail</h2>
+      <button class="detail-close" onclick="closeDetail()">&times;</button>
+    </div>
+    <div class="detail-body" id="detailBody"></div>
+    <div class="detail-actions">
+      <button class="btn btn-primary" onclick="window.print()">Print / Save PDF</button>
+      <button class="btn btn-secondary" onclick="copyDetail()">Copy to Clipboard</button>
+      <button class="btn btn-secondary" onclick="closeDetail()">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// Published Google Sheet CSV URL — set after setup
-const SHEET_URL = ''; // Paste your Google Sheets "Publish to web" CSV URL here
+/* ──── Supabase Config ──── */
+const SUPABASE_URL = ''; // e.g. 'https://xyzabc.supabase.co'
+const SUPABASE_KEY = ''; // anon/public key
 
 let allResults = [];
+let currentDetail = null;
 
+/* ──── Helpers ──── */
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+const typeLabels = {hospital_cssd:'Hospital CSSD',day_surgery:'Day Surgery',dental:'Dental',endoscopy:'Endoscopy',combined:'Combined'};
+const bundleLabels = {yes:'Yes',maybe:'Maybe',no:'No'};
+
+function formatDate(d){
+  if(!d) return '—';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'});
+}
+
+/* ──── Load Data ──── */
 async function loadResults(){
-  const list = document.getElementById('resultsList');
-
-  if(!SHEET_URL){
-    document.getElementById('setupBanner').style.display = 'block';
-    list.innerHTML = '<div class="empty"><h2>No data source configured</h2><p>Set up the Google Sheets integration to start viewing submitted assessments.</p></div>';
+  if(!SUPABASE_URL || !SUPABASE_KEY){
+    document.getElementById('setupBanner').style.display='block';
+    document.getElementById('tableBody').innerHTML='<tr><td colspan="7" class="empty"><h2>No database configured</h2><p>Set up Supabase to start viewing submitted assessments.</p></td></tr>';
     return;
   }
-
-  list.innerHTML = '<div class="empty"><p>Loading results...</p></div>';
 
   try {
-    const resp = await fetch(SHEET_URL);
-    const csv = await resp.text();
-    allResults = parseCSV(csv);
-    renderResults(allResults);
+    const resp = await fetch(SUPABASE_URL + '/rest/v1/assessments?select=*&order=created_at.desc', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    allResults = await resp.json();
+    updateStats();
+    renderTable(allResults);
   } catch(e){
-    list.innerHTML = '<div class="empty"><h2>Could not load results</h2><p>Check the Sheet URL configuration.</p></div>';
+    document.getElementById('tableBody').innerHTML='<tr><td colspan="7" class="empty"><h2>Could not load results</h2><p>'+esc(e.message)+'</p></td></tr>';
   }
 }
 
-function parseCSV(csv){
-  const lines = csv.split('\n');
-  if(lines.length<2) return [];
-  const headers = lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
-  const results = [];
-  for(let i=1;i<lines.length;i++){
-    if(!lines[i].trim()) continue;
-    // Simple CSV parse (handles quoted fields with commas)
-    const vals = [];
-    let current = '';
-    let inQuotes = false;
-    for(let c=0;c<lines[i].length;c++){
-      const ch = lines[i][c];
-      if(ch==='"') { inQuotes=!inQuotes; continue; }
-      if(ch===','&&!inQuotes) { vals.push(current.trim()); current=''; continue; }
-      current+=ch;
-    }
-    vals.push(current.trim());
-    const row = {};
-    headers.forEach((h,idx)=>row[h]=vals[idx]||'');
-    results.push(row);
-  }
-  return results.reverse(); // newest first
+/* ──── Stats ──── */
+function updateStats(){
+  document.getElementById('statTotal').textContent = allResults.length;
+  document.getElementById('statGaps').textContent = allResults.filter(r=>(r.gap_count||0)>0).length;
+  document.getElementById('statBundling').textContent = allResults.filter(r=>r.bundling_interest==='yes'||r.bundling_interest==='maybe').length;
+  const week = Date.now() - 7*24*60*60*1000;
+  document.getElementById('statRecent').textContent = allResults.filter(r=>new Date(r.created_at)>week).length;
 }
 
-function renderResults(results){
-  const list = document.getElementById('resultsList');
-  document.getElementById('resultCount').textContent = `${results.length} assessment${results.length!==1?'s':''}`;
-
+/* ──── Table ──── */
+function renderTable(results){
+  document.getElementById('resultCount').textContent = results.length + ' assessment' + (results.length!==1?'s':'');
   if(results.length===0){
-    list.innerHTML = '<div class="empty"><h2>No results found</h2><p>No assessments match your search.</p></div>';
+    document.getElementById('tableBody').innerHTML='<tr><td colspan="7" class="empty"><p>No assessments found.</p></td></tr>';
     return;
   }
-
-  list.innerHTML = results.map((r,i)=>{
-    const gaps = parseInt(r.gap_count)||0;
-    const recs = parseInt(r.rec_count)||0;
-    return `<div class="card" onclick="toggleDetail(${i})">
-      <div class="card-row">
-        <div style="flex:1;min-width:0">
-          <div class="facility">${esc(r.facility_name||'Unnamed')}</div>
-          <div class="contact">${esc(r.contact_person||'')} ${r.contact_email?'— '+esc(r.contact_email):''}</div>
-        </div>
-        <span class="type">${esc(r.facility_type||'—')}</span>
-        ${gaps>0?`<span class="badge badge-gaps">${gaps} gap${gaps>1?'s':''}</span>`:`<span class="badge badge-ok">No gaps</span>`}
-        <div class="date">${esc(r.timestamp||'')}</div>
-      </div>
-      <div class="detail" id="detail-${i}">
-        <div class="detail-body">
-          <pre>${esc(r.summary||'No summary available')}</pre>
-        </div>
-      </div>
-    </div>`;
+  document.getElementById('tableBody').innerHTML = results.map((r,i)=>{
+    const gaps = r.gap_count||0;
+    return `<tr onclick="showDetail(${i})" data-idx="${i}">
+      <td class="td-name">${esc(r.facility_name||'Unnamed')}</td>
+      <td class="td-contact">${esc(r.contact_person||'')}${r.contact_email?' — '+esc(r.contact_email):''}</td>
+      <td><span class="badge badge-type">${esc(typeLabels[r.facility_type]||r.facility_type||'—')}</span></td>
+      <td>${gaps>0?`<span class="badge badge-gaps">${gaps}</span>`:'<span class="badge badge-ok">0</span>'}</td>
+      <td>${r.rec_count||0}</td>
+      <td>${esc(bundleLabels[r.bundling_interest]||'—')}</td>
+      <td class="td-date">${formatDate(r.created_at)}</td>
+    </tr>`;
   }).join('');
 }
 
-function toggleDetail(idx){
-  const el = document.getElementById('detail-'+idx);
-  el.classList.toggle('open');
-}
-
+/* ──── Filter ──── */
 function filterResults(){
   const q = document.getElementById('searchInput').value.toLowerCase();
-  if(!q){ renderResults(allResults); return; }
-  const filtered = allResults.filter(r=>
-    (r.facility_name||'').toLowerCase().includes(q) ||
-    (r.contact_person||'').toLowerCase().includes(q) ||
-    (r.facility_type||'').toLowerCase().includes(q) ||
+  const typeF = document.getElementById('typeFilter').value;
+  let filtered = allResults;
+  if(typeF) filtered = filtered.filter(r=>r.facility_type===typeF);
+  if(q) filtered = filtered.filter(r=>
+    (r.facility_name||'').toLowerCase().includes(q)||
+    (r.contact_person||'').toLowerCase().includes(q)||
     (r.contact_email||'').toLowerCase().includes(q)
   );
-  renderResults(filtered);
+  renderTable(filtered);
 }
 
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+/* ──── Detail View ──── */
+function showDetail(idx){
+  const filtered = getCurrentFiltered();
+  const r = filtered[idx];
+  if(!r) return;
+  currentDetail = r;
+
+  document.getElementById('detailTitle').textContent = r.facility_name || 'Assessment Detail';
+  let html = '';
+
+  // Facility
+  html += `<div class="detail-section"><h3>Facility Profile</h3><div class="detail-grid">
+    <div class="label">Facility</div><div class="value">${esc(r.facility_name)}</div>
+    <div class="label">Contact</div><div class="value">${esc(r.contact_person)}</div>
+    <div class="label">Email</div><div class="value">${esc(r.contact_email)}</div>
+    <div class="label">Phone</div><div class="value">${esc(r.contact_phone)}</div>
+    <div class="label">Type</div><div class="value">${esc(typeLabels[r.facility_type]||r.facility_type)}</div>
+    <div class="label">Staff</div><div class="value">${r.staff_count||'—'}</div>
+    <div class="label">Date</div><div class="value">${formatDate(r.created_at)}</div>
+  </div></div>`;
+
+  // CSSD
+  const cssd = r.cssd_data;
+  if(cssd && r.facility_type!=='endoscopy'){
+    html += `<div class="detail-section"><h3>CSSD Equipment</h3><div class="detail-grid">`;
+    if(cssd.steam?.has) html += `<div class="label">Steam Sterilizers</div><div class="value">${cssd.steam.count}x ${esc(cssd.steam.brand)} (${cssd.steam.type}) ~${cssd.steam.dailyCycles} cycles/day per machine</div>`;
+    if(cssd.lowtemp?.has) html += `<div class="label">Low-Temp</div><div class="value">${cssd.lowtemp.count}x ${esc(cssd.lowtemp.brand)} (${cssd.lowtemp.type}) ~${cssd.lowtemp.dailyCycles} cycles/day per machine</div>`;
+    if(cssd.wd?.has) html += `<div class="label">Washer-Disinfectors</div><div class="value">${cssd.wd.count}x ${esc(cssd.wd.brand)} ~${cssd.wd.dailyCycles} cycles/day per machine</div>`;
+    if(cssd.ultra?.has) html += `<div class="label">Ultrasonics</div><div class="value">${cssd.ultra.count}x ~${cssd.ultra.dailyCycles} cycles/day per machine</div>`;
+    html += `<div class="label">Traceability</div><div class="value">${esc(cssd.traceability||'—')}</div>`;
+    html += `</div></div>`;
+  }
+
+  // Endoscopy
+  const endo = r.endoscopy_data;
+  if(endo && ['endoscopy','combined','day_surgery'].includes(r.facility_type)){
+    const stepLabels = {detergent_soak:'Soak in detergent',scope_flush:'Channel flush',brush_channels:'Brush channels',leak_test:'Leak test',rinse_before_aer:'Rinse before AER'};
+    html += `<div class="detail-section"><h3>Endoscopy</h3><div class="detail-grid">
+      <div class="label">AERs</div><div class="value">${endo.aerCount||0}x ${esc(endo.aerBrand)}</div>
+      <div class="label">Daily Procedures</div><div class="value">~${endo.dailyProcedures||0}</div>
+      <div class="label">Bedside Kit</div><div class="value">${endo.bedsideCleaning==='yes'?'Yes':endo.bedsideCleaning==='no'?'No':'—'}</div>
+      <div class="label">Reprocessing Steps</div><div class="value">${(endo.endoSteps||[]).map(s=>stepLabels[s]||s).join(', ')||'None specified'}</div>
+      <div class="label">Traceability</div><div class="value">${esc(endo.traceability||'—')}</div>
+    </div></div>`;
+  }
+
+  // Consumables
+  const cons = r.consumables_data;
+  if(cons){
+    html += `<div class="detail-section"><h3>Current Consumables</h3><div class="detail-grid">
+      <div class="label">Chemistry Brand</div><div class="value">${esc(cons.chemistry||'—')}</div>
+      <div class="label">Detergent</div><div class="value">${cons.hasDetergent==='yes'?'Yes ('+(cons.detergentType||'—')+')':esc(cons.hasDetergent||'—')}</div>
+      <div class="label">Rinse/Neutraliser</div><div class="value">${esc(cons.rinseNeutraliser||'—')}${cons.neutraliserPurpose?' ('+esc(cons.neutraliserPurpose)+')':''}</div>
+      <div class="label">CI Types in Use</div><div class="value">${(cons.ciClasses||[]).join(', ')||'None'}</div>
+      <div class="label">CI Brand</div><div class="value">${esc(cons.ciBrand||'—')}</div>
+      <div class="label">PCDs</div><div class="value">${esc(cons.hasPCD||'—')}</div>
+      <div class="label">Protein Testing</div><div class="value">${esc(cons.hasProteinTest||'—')}</div>
+      <div class="label">Result Recording</div><div class="value">${esc(cons.resultRecording||'—')}</div>
+    </div></div>`;
+  }
+
+  // Compliance
+  const comp = r.compliance_data;
+  if(comp){
+    const aspLabels = {full_traceability:'Full digital traceability',audit_ready:'Audit-ready',reduce_costs:'Reduce costs',standardise:'Standardise processes',improve_compliance:'Improve AS 5369 compliance',faster_turnaround:'Faster turnaround',upskill_staff:'Upskill staff',single_supplier:'Single supplier'};
+    html += `<div class="detail-section"><h3>Compliance &amp; Goals</h3><div class="detail-grid">
+      <div class="label">AS 5369 Status</div><div class="value">${esc(comp.status||'—')}</div>
+      ${comp.auditFindings?`<div class="label">Audit Findings</div><div class="value">${esc(comp.auditFindings)}</div>`:''}
+      <div class="label">Challenges</div><div class="value">${(comp.challenges||[]).join(', ')||'None'}</div>
+      <div class="label">Goals</div><div class="value">${(comp.aspirations||[]).map(a=>aspLabels[a]||a).join(', ')||'None'}</div>
+      <div class="label">Bundling</div><div class="value">${esc(bundleLabels[comp.bundling]||'—')}</div>
+      ${comp.notes?`<div class="label">Notes</div><div class="value">${esc(comp.notes)}</div>`:''}
+    </div></div>`;
+  }
+
+  // Gaps
+  const gaps = r.gaps||[];
+  if(gaps.length>0){
+    html += `<div class="detail-gaps"><h4>⚠ Compliance Gaps (${gaps.length})</h4><ul>`;
+    gaps.forEach(g => html += `<li>${esc(g)}</li>`);
+    html += `</ul></div>`;
+  }
+
+  // Recommendations
+  const recs = r.recommendations||[];
+  if(recs.length>0){
+    html += `<div class="detail-section"><h3>Recommendations (${recs.length})</h3>`;
+    let cat='';
+    recs.forEach(rec=>{
+      if(rec.cat!==cat){ cat=rec.cat; html+=`<div style="font-size:11px;font-weight:700;color:var(--navy);margin:12px 0 6px;text-transform:uppercase;letter-spacing:1px">${esc(rec.cat)}</div>`; }
+      html += `<div class="detail-rec ${rec.priority}">
+        <div class="rec-name">[${(rec.priority||'').toUpperCase()}] ${esc(rec.product)}</div>
+        ${rec.reason?`<div class="rec-reason">${esc(rec.reason)}</div>`:''}
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  document.getElementById('detailBody').innerHTML = html;
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeDetail(){
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow='';
+  currentDetail = null;
+}
+
+function getCurrentFiltered(){
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const typeF = document.getElementById('typeFilter').value;
+  let filtered = allResults;
+  if(typeF) filtered = filtered.filter(r=>r.facility_type===typeF);
+  if(q) filtered = filtered.filter(r=>
+    (r.facility_name||'').toLowerCase().includes(q)||
+    (r.contact_person||'').toLowerCase().includes(q)||
+    (r.contact_email||'').toLowerCase().includes(q)
+  );
+  return filtered;
+}
+
+function copyDetail(){
+  if(!currentDetail) return;
+  const text = currentDetail.summary_text || 'No summary available';
+  navigator.clipboard.writeText(text).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  });
+  const btn = event.target;
+  btn.textContent = '✓ Copied';
+  setTimeout(()=>{btn.textContent='Copy to Clipboard'},2000);
+}
+
+// Keyboard shortcut
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeDetail(); });
 
 loadResults();
 </script>

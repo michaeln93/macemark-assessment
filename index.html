@@ -1089,7 +1089,10 @@ const PRODUCT_IMAGES = {
   'PRO1MiCRO': 'https://terragene.com/wp-content/uploads/Pro1-Micro.png',
   'KPRO2-E250': 'https://terragene.com/wp-content/uploads/KPRO2-E250.png',
   'PRO1ENDO_CHEM_20': 'https://terragene.com/wp-content/uploads/PRO1-ENDO-Rev.1-B.png',
-  'bionova_cloud': 'https://terragene.com/wp-content/uploads/Bionova-Q-CSSD-Traceability-Software.png'
+  'bionova_cloud': 'https://terragene.com/wp-content/uploads/Bionova-Q-CSSD-Traceability-Software.png',
+  'stageone': 'https://www.meditechendoscopy.com/wp-content/uploads/2022/07/StageOne-Homepage-400x503.jpg',
+  'aquablue': 'https://www.meditechendoscopy.com/wp-content/uploads/2022/07/AquaBlue-Homepage-400x503.jpg',
+  'protech': 'https://www.meditechendoscopy.com/wp-content/uploads/2022/12/Protech-Homepage@0.5x-400x503.jpg'
 };
 
 function generateRecommendations(){
@@ -1345,6 +1348,7 @@ function generateRecommendations(){
           (bedsideCleaning==='no'?'You indicated you do not currently use a bedside cleaning kit — this is a critical gap in endoscope reprocessing.':''),
         standard:'AS 5369 and GENCA/GESA guidelines require immediate pre-cleaning at the point of use.',
         priority: bedsideCleaning==='no'?'high':'medium',
+        sku:'stageone',
         flowStep:'endo_preclean'
       });
       if(bedsideCleaning==='no') gaps.push('No bedside pre-cleaning kit for endoscopes — AS 5369 and GENCA require immediate pre-cleaning at point of use.');
@@ -1355,6 +1359,7 @@ function generateRecommendations(){
         reason:'StageOne is a comprehensive bedside pre-cleaning kit for endoscopes. You currently use a bedside cleaning kit — StageOne offers an all-in-one solution with enzymatic detergent, sponges, and channel cleaning tools in a single pack.',
         standard:'AS 5369 and GENCA/GESA guidelines require immediate pre-cleaning at the point of use.',
         priority:'low',
+        sku:'stageone',
         flowStep:'endo_preclean'
       });
     }
@@ -1367,6 +1372,7 @@ function generateRecommendations(){
         (!endoSteps.includes('detergent_soak')?' You indicated you may not be soaking scopes in detergent — GENCA/GESA guidelines require full immersion in enzymatic detergent during manual cleaning.':''),
       standard:'AS 5369 and GENCA/GESA Infection Prevention and Control in Endoscopy guidelines require validated cleaning chemistry.',
       priority:'medium',
+      sku:'aquablue',
       flowStep:'endo_clean'
     });
 
@@ -1377,6 +1383,7 @@ function generateRecommendations(){
       reason:'ProTech tip protectors safeguard delicate endoscope distal tips during transport and storage, preventing costly damage. Endoscope tip repair is one of the most common and expensive maintenance items.',
       standard:'GENCA/GESA guidelines emphasise careful handling during transport and storage to prevent damage.',
       priority:'low',
+      sku:'protech',
       flowStep:'endo_storage'
     });
 
@@ -1651,9 +1658,10 @@ function formatTraceability(t){
   return map[t]||'—';
 }
 
-/* ──────── Submission ──────── */
-// Google Apps Script Web App URL — set this after deploying the script
-const SUBMIT_URL = ''; // Paste your Google Apps Script web app URL here
+/* ──────── Submission (Supabase) ──────── */
+// Supabase config — set these after creating your project
+const SUPABASE_URL = ''; // e.g. 'https://xyzabc.supabase.co'
+const SUPABASE_KEY = ''; // anon/public key
 
 function buildResultsText(){
   const a = assessment;
@@ -1736,11 +1744,10 @@ async function submitAssessment(){
   const btn = document.getElementById('submitBtn');
   const status = document.getElementById('submitStatus');
 
-  if(!SUBMIT_URL){
-    // Fallback: copy to clipboard + show message
+  if(!SUPABASE_URL || !SUPABASE_KEY){
     await copyResultsToClipboard();
     status.style.display='block';
-    status.innerHTML='<div style="padding:12px;background:var(--amber-light);border-radius:var(--radius);color:var(--amber)"><strong>Submission endpoint not configured.</strong> Results have been copied to your clipboard — paste into an email to <strong>sales@sess.com.au</strong></div>';
+    status.innerHTML='<div style="padding:12px;background:var(--amber-light);border-radius:var(--radius);color:var(--amber)"><strong>Database not configured yet.</strong> Results have been copied to your clipboard — paste into an email to <strong>sales@sess.com.au</strong></div>';
     return;
   }
 
@@ -1751,31 +1758,46 @@ async function submitAssessment(){
 
   try {
     const payload = {
-      timestamp: new Date().toISOString(),
-      facility: assessment.facility,
-      cssd: assessment.cssd,
-      endoscopy: assessment.endoscopy,
-      consumables: assessment.consumables,
-      compliance: assessment.compliance,
-      gaps: assessment.gaps,
-      recommendations: (assessment.recommendations||[]).map(r=>({product:r.product,priority:r.priority,cat:r.cat})),
-      summary: buildResultsText()
+      facility_name: assessment.facility.name||'',
+      contact_person: assessment.facility.contactPerson||'',
+      contact_email: assessment.facility.contactEmail||'',
+      contact_phone: assessment.facility.contactPhone||'',
+      facility_type: assessment.facility.facilityType||'',
+      staff_count: assessment.facility.staffCount||0,
+      facility_data: assessment.facility,
+      cssd_data: assessment.cssd,
+      endoscopy_data: assessment.endoscopy,
+      consumables_data: assessment.consumables,
+      compliance_data: assessment.compliance,
+      gaps: assessment.gaps||[],
+      recommendations: (assessment.recommendations||[]).filter(r=>!r.isFeature).map(r=>({product:r.product,priority:r.priority,cat:r.cat,reason:r.reason,standard:r.standard,sku:r.sku})),
+      gap_count: (assessment.gaps||[]).length,
+      rec_count: (assessment.recommendations||[]).filter(r=>!r.isFeature).length,
+      summary_text: buildResultsText(),
+      bundling_interest: assessment.compliance.bundling||''
     };
 
-    const resp = await fetch(SUBMIT_URL, {
+    const resp = await fetch(SUPABASE_URL + '/rest/v1/assessments', {
       method: 'POST',
-      mode: 'no-cors',
-      headers: {'Content-Type':'application/json'},
+      headers: {
+        'Content-Type':'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Prefer': 'return=minimal'
+      },
       body: JSON.stringify(payload)
     });
 
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+
     btn.textContent = '✓ Submitted';
     btn.style.background = 'var(--green)';
-    status.innerHTML = '<div style="padding:12px;background:var(--green-light);border-radius:var(--radius);color:var(--green)"><strong>Assessment submitted successfully!</strong> Our team will review your results and be in touch.</div>';
+    status.innerHTML = '<div style="padding:12px;background:var(--green-light);border-radius:var(--radius);color:var(--green)"><strong>Assessment submitted successfully!</strong> Our team will review your results and be in touch shortly.</div>';
   } catch(err){
     btn.disabled = false;
     btn.textContent = 'Submit Assessment';
     status.innerHTML = '<div style="padding:12px;background:var(--red-light);border-radius:var(--radius);color:var(--red)"><strong>Submission failed.</strong> Please use "Copy Results" and email to sales@sess.com.au</div>';
+    console.error('Submit error:', err);
   }
 }
 
