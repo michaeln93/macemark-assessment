@@ -336,8 +336,8 @@ textarea{resize:vertical;min-height:60px}
                   <input type="text" id="steamBrand" placeholder="e.g. Atherton Gorilla">
                 </div>
                 <div class="form-row">
-                  <label>Approx. Daily Cycles (total)</label>
-                  <input type="number" id="steamCycles" min="0" placeholder="e.g. 20">
+                  <label>Approx. Daily Cycles (per machine)</label>
+                  <input type="number" id="steamCycles" min="0" placeholder="e.g. 8">
                 </div>
                 <div class="form-row">
                   <label>Sterilizer Type</label>
@@ -406,8 +406,8 @@ textarea{resize:vertical;min-height:60px}
                   <input type="text" id="wdBrand" placeholder="e.g. KEN IQ6">
                 </div>
                 <div class="form-row">
-                  <label>Approx. Daily Cycles (total)</label>
-                  <input type="number" id="wdCycles" min="0" placeholder="e.g. 30">
+                  <label>Approx. Daily Cycles (per machine)</label>
+                  <input type="number" id="wdCycles" min="0" placeholder="e.g. 10">
                 </div>
               </div>
             </div>
@@ -448,12 +448,11 @@ textarea{resize:vertical;min-height:60px}
             </select>
           </div>
 
-          <div class="form-row">
-            <label>Compliance Standard</label>
-            <select id="cssdStandard">
-              <option value="as5369" selected>AS 5369 — Reprocessing of Reusable Medical Devices</option>
-            </select>
+          <div class="info-box" style="margin-top:12px">
+            <strong>AS 5369 Compliance</strong>
+            This assessment evaluates your facility's reprocessing practices against <strong>AS 5369 — Reprocessing of Reusable Medical Devices and Equipment</strong>, the current Australian standard for CSSD and endoscopy reprocessing.
           </div>
+          <input type="hidden" id="cssdStandard" value="as5369">
         </div>
       </div>
     </div>
@@ -465,7 +464,7 @@ textarea{resize:vertical;min-height:60px}
         <div class="card-body">
           <div class="info-box">
             <strong>Endoscope Reprocessing</strong>
-            Proper reprocessing of flexible endoscopes is critical for patient safety. AS 5369 sets out the requirements for cleaning, disinfection and storage of endoscopes.
+            This section evaluates your endoscopy reprocessing workflow against AS 5369 and GENCA (Gastroenterological Nurses College of Australia) best-practice guidelines.
           </div>
 
           <div class="form-grid">
@@ -477,22 +476,58 @@ textarea{resize:vertical;min-height:60px}
               <label>AER Brand / Model</label>
               <input type="text" id="aerBrand" placeholder="e.g. Olympus, Medivators">
             </div>
-            <div class="form-row">
-              <label>Number of Endoscopes</label>
-              <input type="number" id="scopeCount" min="0" placeholder="Total scopes">
+          </div>
+
+          <div class="form-row" style="margin-top:12px">
+            <label>Approx. Daily Procedures</label>
+            <div class="hint">Roughly how many endoscopy procedures does your facility perform per day?</div>
+            <input type="number" id="dailyProcedures" min="0" placeholder="e.g. 25">
+          </div>
+
+          <div class="form-row" style="margin-top:16px">
+            <label>Bedside Pre-Cleaning</label>
+            <div class="hint">Do you use a bedside pre-cleaning kit (point-of-use) immediately after each procedure?</div>
+            <div class="radio-group" id="bedsideCleaningGroup">
+              <label class="radio-item" onclick="selectRadio(this,'bedsideCleaningGroup')">
+                <input type="radio" name="bedsideCleaning" value="yes"> Yes
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'bedsideCleaningGroup')">
+                <input type="radio" name="bedsideCleaning" value="no"> No
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'bedsideCleaningGroup')">
+                <input type="radio" name="bedsideCleaning" value="unsure"> Unsure
+              </label>
             </div>
-            <div class="form-row">
-              <label>Approx. Daily Procedures</label>
-              <input type="number" id="dailyProcedures" min="0" placeholder="e.g. 25">
+          </div>
+
+          <div class="form-row" style="margin-top:16px">
+            <label>Scope Reprocessing Steps</label>
+            <div class="hint">When manually reprocessing scopes, which of the following do you perform? (Select all that apply)</div>
+            <div id="endoStepsChecks" class="check-group" style="margin-top:8px">
+              <div class="check-item" onclick="toggleCheck(this)">
+                <input type="checkbox" value="detergent_soak">
+                <div><div class="check-label">Soak in detergent</div></div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)">
+                <input type="checkbox" value="scope_flush">
+                <div><div class="check-label">Scope channel flush</div></div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)">
+                <input type="checkbox" value="brush_channels">
+                <div><div class="check-label">Pass a brush through channels</div></div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)">
+                <input type="checkbox" value="leak_test">
+                <div><div class="check-label">Perform leak test prior to AER</div></div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)">
+                <input type="checkbox" value="rinse_before_aer">
+                <div><div class="check-label">Rinse before placing in AER</div></div>
+              </div>
             </div>
           </div>
 
           <div class="form-row" style="margin-top:12px">
-            <label>Current Endoscopy Cleaning Products</label>
-            <input type="text" id="endoChemistry" placeholder="Brand / products currently in use">
-          </div>
-
-          <div class="form-row">
             <label>How do you track endoscope reprocessing?</label>
             <select id="endoTraceability">
               <option value="">-- Select --</option>
@@ -511,47 +546,124 @@ textarea{resize:vertical;min-height:60px}
       <div class="card">
         <div class="card-header">Current Consumables</div>
         <div class="card-body">
+
+          <!-- Chemistry Section -->
           <div class="form-row">
-            <label>Current Cleaning Chemistry Brand / Products</label>
-            <input type="text" id="currentChemistry" placeholder="e.g. Ecolab Sekusept, 3M, etc.">
+            <label>Current Chemistry Brand / Supplier</label>
+            <input type="text" id="currentChemistry" placeholder="e.g. Ecolab, Whiteley, 3M, Steris, etc.">
           </div>
 
-          <div class="form-row" style="margin-top:16px">
+          <div class="form-row" style="margin-top:14px">
+            <label>Are you currently running a detergent?</label>
+            <div class="radio-group" id="hasDetergent">
+              <label class="radio-item" onclick="selectRadio(this,'hasDetergent')">
+                <input type="radio" name="hasDetergent" value="yes"> Yes
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'hasDetergent')">
+                <input type="radio" name="hasDetergent" value="no"> No
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'hasDetergent')">
+                <input type="radio" name="hasDetergent" value="unsure"> Unsure
+              </label>
+            </div>
+          </div>
+
+          <div class="form-row" id="detergentTypeRow" style="margin-top:10px;display:none">
+            <label>What type of detergent?</label>
+            <div class="hint">Enzymatic detergents use enzymes to break down organic matter (blood, protein, fat). Non-enzymatic/alkaline detergents rely on chemical action instead.</div>
+            <div class="radio-group" id="detergentType" style="margin-top:6px">
+              <label class="radio-item" onclick="selectRadio(this,'detergentType')">
+                <input type="radio" name="detergentType" value="enzymatic"> Enzymatic
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'detergentType')">
+                <input type="radio" name="detergentType" value="non_enzymatic"> Non-Enzymatic
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'detergentType')">
+                <input type="radio" name="detergentType" value="alkaline"> Alkaline
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'detergentType')">
+                <input type="radio" name="detergentType" value="unsure"> Unsure
+              </label>
+            </div>
+          </div>
+
+          <div class="form-row" style="margin-top:14px">
+            <label>Are you running a rinse aid or neutraliser?</label>
+            <div class="radio-group" id="hasRinseNeutraliser">
+              <label class="radio-item" onclick="selectRadio(this,'hasRinseNeutraliser')">
+                <input type="radio" name="hasRinseNeutraliser" value="rinse_aid"> Rinse Aid
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'hasRinseNeutraliser')">
+                <input type="radio" name="hasRinseNeutraliser" value="neutraliser"> Neutraliser
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'hasRinseNeutraliser')">
+                <input type="radio" name="hasRinseNeutraliser" value="both"> Both
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'hasRinseNeutraliser')">
+                <input type="radio" name="hasRinseNeutraliser" value="none"> Neither
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'hasRinseNeutraliser')">
+                <input type="radio" name="hasRinseNeutraliser" value="unsure"> Unsure
+              </label>
+            </div>
+          </div>
+
+          <div class="form-row" id="neutraliserPurposeRow" style="margin-top:10px;display:none">
+            <label>What is the neutraliser used for?</label>
+            <div class="hint">A neutraliser can be used to neutralise alkaline residue from the wash cycle, or as a buffing/polishing agent that improves instrument finish and protects against corrosion.</div>
+            <div class="radio-group" id="neutraliserPurpose" style="margin-top:6px">
+              <label class="radio-item" onclick="selectRadio(this,'neutraliserPurpose')">
+                <input type="radio" name="neutraliserPurpose" value="neutralising"> Neutralising (pH correction)
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'neutraliserPurpose')">
+                <input type="radio" name="neutraliserPurpose" value="buffing"> Buffing / Polishing
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'neutraliserPurpose')">
+                <input type="radio" name="neutraliserPurpose" value="both"> Both
+              </label>
+              <label class="radio-item" onclick="selectRadio(this,'neutraliserPurpose')">
+                <input type="radio" name="neutraliserPurpose" value="unsure"> Unsure
+              </label>
+            </div>
+          </div>
+
+          <!-- Chemical Indicators -->
+          <div class="form-row" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--gray-200)">
             <label>Chemical Indicators Currently in Use</label>
             <div class="hint">Select all classes you currently use. Each class serves a different purpose in sterilization monitoring (ISO 11140-1).</div>
             <div id="ciChecks" class="check-group" style="margin-top:8px">
               <div class="check-item" onclick="toggleCheck(this)">
                 <input type="checkbox" value="1">
                 <div>
-                  <div class="check-label">Class 1 — Process Indicator</div>
+                  <div class="check-label">Type 1 — Process Indicator</div>
                   <div class="check-desc">Autoclave tape or printed indicators on packaging. Shows the item has been <strong>exposed</strong> to the sterilization process (not that it is sterile).</div>
                 </div>
               </div>
               <div class="check-item" onclick="toggleCheck(this)">
                 <input type="checkbox" value="2">
                 <div>
-                  <div class="check-label">Class 2 — Bowie-Dick Test</div>
+                  <div class="check-label">Type 2 — Bowie-Dick Test</div>
                   <div class="check-desc">Specific-use indicator for <strong>air removal testing</strong> in pre-vacuum steam sterilizers. Required as a daily test to verify the vacuum system is working correctly.</div>
                 </div>
               </div>
               <div class="check-item" onclick="toggleCheck(this)">
                 <input type="checkbox" value="4">
                 <div>
-                  <div class="check-label">Class 4 — Multi-Variable</div>
+                  <div class="check-label">Type 4 — Multi-Variable</div>
                   <div class="check-desc">Reacts to <strong>two or more</strong> critical sterilization variables (e.g. time and temperature). Used for routine pack/load monitoring.</div>
                 </div>
               </div>
               <div class="check-item" onclick="toggleCheck(this)">
                 <input type="checkbox" value="5">
                 <div>
-                  <div class="check-label">Class 5 — Integrating Indicator</div>
+                  <div class="check-label">Type 5 — Integrating Indicator</div>
                   <div class="check-desc">Reacts to <strong>all critical variables</strong> of the sterilization process. Performance correlates with biological indicator results — a reliable in-pack monitor.</div>
                 </div>
               </div>
               <div class="check-item" onclick="toggleCheck(this)">
                 <input type="checkbox" value="6">
                 <div>
-                  <div class="check-label">Class 6 — Emulating Indicator</div>
+                  <div class="check-label">Type 6 — Emulating Indicator</div>
                   <div class="check-desc"><strong>Cycle-specific</strong> indicator that reacts to all critical variables for one specific sterilization cycle type (e.g. 134°C/3.5 min). The most precise chemical indicator.</div>
                 </div>
               </div>
@@ -655,7 +767,33 @@ textarea{resize:vertical;min-height:60px}
 
           <div class="form-row">
             <label>What does best practice look like for your facility?</label>
-            <textarea id="aspirations" placeholder="What standards or goals are you working towards? What would the ideal setup look like?"></textarea>
+            <div class="hint">Select all that apply — what are you working towards?</div>
+            <div id="aspirationChecks" class="check-group" style="margin-top:8px">
+              <div class="check-item" onclick="toggleCheck(this)" style="min-width:200px">
+                <input type="checkbox" value="full_traceability"> <div><div class="check-label">Full digital traceability</div><div class="check-desc">Every instrument, cycle, and result tracked electronically</div></div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)" style="min-width:200px">
+                <input type="checkbox" value="audit_ready"> <div><div class="check-label">Audit-ready at all times</div><div class="check-desc">Records and processes always ready for inspection</div></div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)" style="min-width:200px">
+                <input type="checkbox" value="reduce_costs"> <div><div class="check-label">Reduce consumable costs</div><div class="check-desc">Optimise spend without compromising quality</div></div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)" style="min-width:200px">
+                <input type="checkbox" value="standardise"> <div><div class="check-label">Standardise processes</div><div class="check-desc">Consistent SOPs and products across the department</div></div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)" style="min-width:200px">
+                <input type="checkbox" value="improve_compliance"> <div><div class="check-label">Improve AS 5369 compliance</div><div class="check-desc">Close gaps and meet current Australian standards</div></div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)" style="min-width:200px">
+                <input type="checkbox" value="faster_turnaround"> <div><div class="check-label">Faster instrument turnaround</div><div class="check-desc">Reduce cycle times and processing bottlenecks</div></div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)" style="min-width:200px">
+                <input type="checkbox" value="upskill_staff"> <div><div class="check-label">Upskill staff</div><div class="check-desc">Better training and confidence in reprocessing</div></div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)" style="min-width:200px">
+                <input type="checkbox" value="single_supplier"> <div><div class="check-label">Single supplier for consumables</div><div class="check-desc">One point of contact for all reprocessing supplies</div></div>
+              </div>
+            </div>
           </div>
 
           <div class="form-row">
@@ -736,6 +874,14 @@ function selectRadio(el, groupId){
   document.querySelectorAll('#'+groupId+' .radio-item').forEach(r=>r.classList.remove('selected'));
   el.classList.add('selected');
   el.querySelector('input[type="radio"]').checked=true;
+  // Conditional field visibility
+  if(groupId==='hasDetergent'){
+    document.getElementById('detergentTypeRow').style.display = el.querySelector('input').value==='yes'?'block':'none';
+  }
+  if(groupId==='hasRinseNeutraliser'){
+    const v = el.querySelector('input').value;
+    document.getElementById('neutraliserPurposeRow').style.display = (v==='neutraliser'||v==='both')?'block':'none';
+  }
 }
 
 function getCheckedValues(containerId){
@@ -844,15 +990,19 @@ function collectCurrentStep(){
       assessment.endoscopy = {
         aerCount: numVal('aerCount'),
         aerBrand: val('aerBrand'),
-        scopeCount: numVal('scopeCount'),
         dailyProcedures: numVal('dailyProcedures'),
-        chemistry: val('endoChemistry'),
+        bedsideCleaning: getRadioValue('bedsideCleaning'),
+        endoSteps: getCheckedValues('endoStepsChecks'),
         traceability: val('endoTraceability')
       };
       break;
     case 4:
       assessment.consumables = {
         chemistry: val('currentChemistry'),
+        hasDetergent: getRadioValue('hasDetergent'),
+        detergentType: getRadioValue('detergentType'),
+        rinseNeutraliser: getRadioValue('hasRinseNeutraliser'),
+        neutraliserPurpose: getRadioValue('neutraliserPurpose'),
         ciClasses: getCheckedValues('ciChecks'),
         ciBrand: val('ciBrand'),
         hasPCD: val('hasPCD'),
@@ -865,7 +1015,7 @@ function collectCurrentStep(){
         status: getRadioValue('compliance'),
         auditFindings: val('auditFindings'),
         challenges: getCheckedValues('challengeChecks'),
-        aspirations: val('aspirations'),
+        aspirations: getCheckedValues('aspirationChecks'),
         bundling: getRadioValue('bundling'),
         notes: val('additionalNotes')
       };
@@ -1101,15 +1251,18 @@ function generateRecommendations(){
   /* ── Bionova Cloud (Traceability) ── */
   const traceability = a.cssd.traceability || a.endoscopy?.traceability || a.consumables.resultRecording || '';
   const traceChallenges = (a.compliance.challenges||[]).includes('traceability');
+  const aspirations = a.compliance.aspirations||[];
+  const wantsTraceability = aspirations.includes('full_traceability') || aspirations.includes('audit_ready');
   const poorTraceability = ['none','paper','spreadsheet',''].includes(traceability) || ['none','paper','spreadsheet',''].includes(a.consumables.resultRecording);
 
-  if(poorTraceability || traceChallenges){
+  if(poorTraceability || traceChallenges || wantsTraceability){
     recs.push({
       cat:'Bionova Cloud',
       product:'Terragene Bionova Cloud — Digital Traceability Platform',
       reason: 'Bionova Cloud provides automated indicator result reading, cloud-based record keeping, and audit-ready reporting. ' +
         (poorTraceability ? 'Your current tracking method could be significantly enhanced with digital traceability. ' : '') +
         (traceChallenges ? 'You identified traceability as a key challenge — Bionova Cloud directly addresses this. ' : '') +
+        (wantsTraceability ? 'This aligns with your goal of ' + (aspirations.includes('full_traceability')?'full digital traceability':'being audit-ready at all times') + '. ' : '') +
         'Real-time dashboards give management oversight of every sterilization cycle and consumable result.',
       standard:'AS 5369 requires documented evidence of reprocessing. Bionova Cloud provides automated, tamper-proof digital records that satisfy audit requirements.',
       priority: traceChallenges?'high':'medium',
@@ -1122,26 +1275,39 @@ function generateRecommendations(){
   if(hasCSSD){
     const currentChem = (a.consumables.chemistry||'').toLowerCase();
     const isMaxRange = currentChem.includes('max') || currentChem.includes('zymax') || currentChem.includes('macemark');
+    const detType = a.consumables.detergentType||'';
+    const rinseNeut = a.consumables.rinseNeutraliser||'';
 
     if(!isMaxRange){
       if(a.cssd.wd?.has){
         const wdCycles = a.cssd.wd.dailyCycles||0;
+        let detReason = 'ZyMax is a high-performance enzymatic detergent formulated for automated washer-disinfectors. It breaks down protein, blood, and organic material from surgical instruments effectively at low concentrations.';
+        if(detType==='non_enzymatic'||detType==='alkaline'){
+          detReason += ' You are currently using a '+detType.replace('_','-')+' detergent — enzymatic formulations are generally recommended for effective organic soil removal per AS 5369.';
+        } else if(a.consumables.hasDetergent==='no'){
+          detReason += ' You indicated you are not currently running a detergent — a validated cleaning chemistry is required for automated reprocessing.';
+        }
         recs.push({
           cat:'Max Range Chemistry',
           product:'ZyMax — Enzymatic Detergent',
-          reason:'ZyMax is a high-performance enzymatic detergent formulated for automated washer-disinfectors. It breaks down protein, blood, and organic material from surgical instruments effectively at low concentrations.',
+          reason: detReason,
           standard:'AS 5369 requires validated cleaning chemistry for automated reprocessing.',
-          priority:'medium',
-          volume: wdCycles>0 ? `Based on ~${wdCycles} daily WD cycles — contact us for dosage calculation` : '',
+          priority: a.consumables.hasDetergent==='no'?'high':'medium',
+          volume: wdCycles>0 ? `Based on ~${wdCycles} daily WD cycles (per machine) — contact us for dosage calculation` : '',
           flowStep:'auto_clean'
         });
+
+        let dryReason = 'DryMax is used in the final rinse stage of washer-disinfectors to promote rapid drying and prevent water spotting on instruments. Proper drying is essential to prevent corrosion and ensure sterility maintenance.';
+        if(rinseNeut==='none'||rinseNeut===''){
+          dryReason += ' You are not currently running a rinse aid — DryMax prevents water marks and accelerates drying.';
+        }
         recs.push({
           cat:'Max Range Chemistry',
           product:'DryMax — Rinse & Drying Aid',
-          reason:'DryMax is used in the final rinse stage of washer-disinfectors to promote rapid drying and prevent water spotting on instruments. Proper drying is essential to prevent corrosion and ensure sterility maintenance.',
+          reason: dryReason,
           standard:'AS 5369 requires instruments to be thoroughly dried before packaging and sterilization.',
-          priority:'low',
-          volume: wdCycles>0 ? `Based on ~${wdCycles} daily WD cycles — contact us for dosage calculation` : '',
+          priority: (rinseNeut==='none')?'medium':'low',
+          volume: wdCycles>0 ? `Based on ~${wdCycles} daily WD cycles (per machine) — contact us for dosage calculation` : '',
           flowStep:'auto_clean'
         });
       }
@@ -1172,38 +1338,64 @@ function generateRecommendations(){
 
   /* ── Meditech (Endoscopy) ── */
   if(hasEndo){
-    const currentEndoChem = (a.endoscopy?.chemistry||'').toLowerCase();
-    const isMeditech = currentEndoChem.includes('meditech') || currentEndoChem.includes('stageone') || currentEndoChem.includes('aquablue');
     const procs = a.endoscopy?.dailyProcedures||0;
+    const bedsideCleaning = a.endoscopy?.bedsideCleaning||'';
+    const endoSteps = a.endoscopy?.endoSteps||[];
 
-    if(!isMeditech){
+    // StageOne — recommend if no bedside cleaning kit or always for endoscopy
+    if(bedsideCleaning!=='yes'){
       recs.push({
         cat:'Meditech Endoscopy',
-        product:'StageOne — Endoscope Pre-Cleaning Solution',
-        reason:'StageOne is used for bedside pre-cleaning of endoscopes immediately after the procedure. Prompt pre-cleaning prevents biofilm formation and organic material from drying onto the endoscope channels.',
-        standard:'AS 5369 requires immediate pre-cleaning of endoscopes at the point of use.',
-        priority:'medium',
-        volume: procs>0 ? `~${procs*DAYS} units/month (${procs} daily procedures)` : '',
+        product:'StageOne — Endoscope Bedside Pre-Cleaning Kit',
+        reason:'StageOne is a bedside pre-cleaning kit used immediately after each procedure. Per GENCA guidelines, prompt pre-cleaning at the point of use prevents biofilm formation and organic material from drying onto endoscope channels. ' +
+          (bedsideCleaning==='no'?'You indicated you do not currently use a bedside cleaning kit — this is a critical gap in endoscope reprocessing.':''),
+        standard:'AS 5369 and GENCA guidelines require immediate pre-cleaning at the point of use.',
+        priority: bedsideCleaning==='no'?'high':'medium',
+        volume: procs>0 ? `~${procs*DAYS} kits/month (${procs} daily procedures)` : '',
         flowStep:'endo_preclean'
       });
+      if(bedsideCleaning==='no') gaps.push('No bedside pre-cleaning kit for endoscopes — AS 5369 and GENCA require immediate pre-cleaning at point of use.');
+    } else {
       recs.push({
         cat:'Meditech Endoscopy',
-        product:'AquaBlue — Endoscope Cleaning Solution',
-        reason:'AquaBlue is a dedicated endoscope cleaning detergent for use in manual and automated reprocessing. Formulated for compatibility with all major endoscope brands.',
-        standard:'AS 5369 requires validated cleaning chemistry specific to endoscope reprocessing.',
-        priority:'medium',
-        volume: procs>0 ? `Based on ~${procs} daily procedures — contact us for volume calculation` : '',
-        flowStep:'endo_clean'
-      });
-      recs.push({
-        cat:'Meditech Endoscopy',
-        product:'ProTech Tip Protectors',
-        reason:'ProTech tip protectors safeguard delicate endoscope distal tips during transport and storage, preventing costly damage. Endoscope tip repair is one of the most common and expensive maintenance items.',
-        standard:'Best practice for endoscope handling and transport — protects your investment.',
+        product:'StageOne — Endoscope Bedside Pre-Cleaning Kit',
+        reason:'StageOne is a comprehensive bedside pre-cleaning kit for endoscopes. You currently use a bedside cleaning kit — StageOne offers an all-in-one solution with enzymatic detergent, sponges, and channel cleaning tools in a single pack.',
+        standard:'AS 5369 and GENCA guidelines require immediate pre-cleaning at the point of use.',
         priority:'low',
-        volume: procs>0 ? `~${a.endoscopy?.scopeCount||procs} protectors in rotation` : '',
-        flowStep:'endo_storage'
+        volume: procs>0 ? `~${procs*DAYS} kits/month (${procs} daily procedures)` : '',
+        flowStep:'endo_preclean'
       });
+    }
+
+    // AquaBlue — endoscope reprocessing detergent
+    recs.push({
+      cat:'Meditech Endoscopy',
+      product:'AquaBlue — Endoscope Cleaning Solution',
+      reason:'AquaBlue is a dedicated endoscope cleaning detergent for manual and automated reprocessing. Formulated for compatibility with all major endoscope and AER brands.' +
+        (!endoSteps.includes('detergent_soak')?' You indicated you may not be soaking scopes in detergent — this is a recommended step per GENCA guidelines.':''),
+      standard:'AS 5369 requires validated cleaning chemistry specific to endoscope reprocessing.',
+      priority:'medium',
+      volume: procs>0 ? `Based on ~${procs} daily procedures — contact us for volume calculation` : '',
+      flowStep:'endo_clean'
+    });
+
+    // ProTech tip protectors
+    recs.push({
+      cat:'Meditech Endoscopy',
+      product:'ProTech Tip Protectors',
+      reason:'ProTech tip protectors safeguard delicate endoscope distal tips during transport and storage, preventing costly damage. Endoscope tip repair is one of the most common and expensive maintenance items.',
+      standard:'Best practice for endoscope handling and transport — protects your investment.',
+      priority:'low',
+      volume: procs>0 ? `Based on ~${procs} daily procedures` : '',
+      flowStep:'endo_storage'
+    });
+
+    // Flag missing reprocessing steps
+    if(!endoSteps.includes('leak_test')){
+      gaps.push('Leak test not performed before AER — GENCA and AS 5369 require a leak test prior to automated reprocessing to detect scope damage.');
+    }
+    if(!endoSteps.includes('brush_channels')){
+      gaps.push('Channel brushing not performed — GENCA guidelines recommend brushing all accessible channels during manual cleaning to remove debris.');
     }
   }
 
@@ -1353,9 +1545,10 @@ function renderRecommendations(recs, gaps){
   if(['endoscopy','combined','day_surgery'].includes(a.facility.facilityType)){
     html += `<div class="summary-section"><h3>Endoscopy</h3>`;
     html += `<div class="summary-row"><span class="label">AERs</span><span class="value">${a.endoscopy.aerCount||0}x ${esc(a.endoscopy.aerBrand)}</span></div>`;
-    html += `<div class="summary-row"><span class="label">Endoscopes</span><span class="value">${a.endoscopy.scopeCount||0}</span></div>`;
     html += `<div class="summary-row"><span class="label">Daily Procedures</span><span class="value">~${a.endoscopy.dailyProcedures||0}</span></div>`;
-    html += `<div class="summary-row"><span class="label">Current Chemistry</span><span class="value">${esc(a.endoscopy.chemistry)||'—'}</span></div>`;
+    html += `<div class="summary-row"><span class="label">Bedside Cleaning Kit</span><span class="value">${a.endoscopy.bedsideCleaning==='yes'?'Yes':a.endoscopy.bedsideCleaning==='no'?'No':'—'}</span></div>`;
+    const endoStepLabels = {detergent_soak:'Soak in detergent',scope_flush:'Channel flush',brush_channels:'Brush channels',leak_test:'Leak test',rinse_before_aer:'Rinse before AER'};
+    html += `<div class="summary-row"><span class="label">Reprocessing Steps</span><span class="value">${(a.endoscopy.endoSteps||[]).map(s=>endoStepLabels[s]||s).join(', ')||'None specified'}</span></div>`;
     html += `</div>`;
   }
 
@@ -1511,14 +1704,17 @@ function emailResults(){
   if(['endoscopy','combined','day_surgery'].includes(a.facility.facilityType) && a.endoscopy){
     body += `ENDOSCOPY${nl}`;
     body += `AERs: ${a.endoscopy.aerCount||0}x ${a.endoscopy.aerBrand||'—'}${nl}`;
-    body += `Endoscopes: ${a.endoscopy.scopeCount||0}${nl}`;
     body += `Daily Procedures: ~${a.endoscopy.dailyProcedures||0}${nl}`;
-    body += `Current Chemistry: ${a.endoscopy.chemistry||'—'}${nl}`;
+    body += `Bedside Cleaning Kit: ${a.endoscopy.bedsideCleaning==='yes'?'Yes':a.endoscopy.bedsideCleaning==='no'?'No':'—'}${nl}`;
+    const stepLabels = {detergent_soak:'Soak in detergent',scope_flush:'Channel flush',brush_channels:'Brush channels',leak_test:'Leak test',rinse_before_aer:'Rinse before AER'};
+    body += `Reprocessing Steps: ${(a.endoscopy.endoSteps||[]).map(s=>stepLabels[s]||s).join(', ')||'None specified'}${nl}`;
     body += `Traceability: ${formatTraceability(a.endoscopy?.traceability)}${nl}${nl}`;
   }
 
   body += `CURRENT CONSUMABLES${nl}`;
-  body += `Chemistry: ${a.consumables.chemistry||'—'}${nl}`;
+  body += `Chemistry Brand: ${a.consumables.chemistry||'—'}${nl}`;
+  body += `Detergent: ${a.consumables.hasDetergent==='yes'?'Yes ('+( a.consumables.detergentType||'type not specified')+')':a.consumables.hasDetergent||'—'}${nl}`;
+  body += `Rinse/Neutraliser: ${a.consumables.rinseNeutraliser||'—'}${a.consumables.neutraliserPurpose?' ('+a.consumables.neutraliserPurpose+')':''}${nl}`;
   body += `CI Classes: ${(a.consumables.ciClasses||[]).join(', ')||'None'}${nl}`;
   body += `CI Brand: ${a.consumables.ciBrand||'—'}${nl}`;
   body += `PCDs: ${a.consumables.hasPCD||'—'}${nl}`;
@@ -1529,7 +1725,7 @@ function emailResults(){
   body += `AS 5369 Status: ${a.compliance.status||'—'}${nl}`;
   if(a.compliance.auditFindings) body += `Audit Findings: ${a.compliance.auditFindings}${nl}`;
   if((a.compliance.challenges||[]).length>0) body += `Challenges: ${a.compliance.challenges.join(', ')}${nl}`;
-  if(a.compliance.aspirations) body += `Goals: ${a.compliance.aspirations}${nl}`;
+  if((a.compliance.aspirations||[]).length>0) body += `Goals: ${a.compliance.aspirations.join(', ')}${nl}`;
   if(a.compliance.notes) body += `Notes: ${a.compliance.notes}${nl}`;
   body += nl;
 
