@@ -142,8 +142,9 @@ textarea{resize:vertical;min-height:60px}
 .rec-sku{font-size:11px;color:var(--gray-400);font-weight:400;font-family:monospace;margin-top:2px}
 .rec-card-body{padding:0 16px 12px}
 .rec-card-body p{font-size:13px;color:var(--gray-600);margin-bottom:6px}
+.rec-img{float:right;margin:0 0 8px 12px;width:90px;height:90px;display:flex;align-items:center;justify-content:center;background:var(--white);border:1px solid var(--gray-100);border-radius:var(--radius);overflow:hidden}
+.rec-img img{max-width:100%;max-height:100%;object-fit:contain}
 .rec-standard{font-size:12px;color:var(--blue-dark);background:var(--blue-light);padding:6px 10px;border-radius:4px;margin-top:6px;display:inline-block}
-.rec-volume{font-size:12px;color:var(--gray-500);margin-top:4px}
 
 /* Gap alert */
 .gap-alert{background:var(--red-light);border:1px solid var(--red);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px}
@@ -934,7 +935,7 @@ function renderWizardNav(){
   if(prev) html+=`<button class="btn btn-secondary" onclick="goStep(${prev})">&larr; Back</button>`;
   else html+='<span></span>';
   if(next) html+=`<button class="btn btn-primary" onclick="goStep(${next})">Next &rarr;</button>`;
-  else if(currentStep===6) html+=`<button class="btn btn-success" onclick="emailResults()">Email Results to Sales</button>`;
+  else if(currentStep===6) html+=`<button class="btn btn-success" onclick="submitAssessment()">Submit Assessment</button>`;
   else html+='<span></span>';
   document.getElementById('wizardNav').innerHTML=html;
 }
@@ -1075,6 +1076,22 @@ function calcConsumptionSnapshot(a){
   };
 }
 
+/* ──────── Product Images ──────── */
+const PRODUCT_IMAGES = {
+  'CT22_CINT_1_FDA': 'https://terragene.com/wp-content/uploads/CT22-2000-X-2000.jpg',
+  'CT40': 'https://terragene.com/wp-content/uploads/CT22-2000-X-2000.jpg',
+  'BD125X/1_CHEM_20TZ': 'https://terragene.com/wp-content/uploads/BDX125-2-1.jpg',
+  'CD29CHEM250/500FDA': 'https://terragene.com/wp-content/uploads/CD29-rev8-WEB-2000-X-2000.jpg',
+  'IT26-1YSINTE200FDA': 'https://terragene.com/wp-content/uploads/IT26-1YS-1.jpg',
+  'IT28_inte_250': 'https://terragene.com/wp-content/uploads/IT28.jpg',
+  'CDWA4_CHEM_200': 'https://terragene.com/wp-content/uploads/CDWA4-REV-82000-X-2000.jpg',
+  'CDWU_CHEM_30': 'https://terragene.com/wp-content/uploads/CDWU-1-2.jpg',
+  'PRO1MiCRO': 'https://terragene.com/wp-content/uploads/Pro1-Micro.png',
+  'KPRO2-E250': 'https://terragene.com/wp-content/uploads/KPRO2-E250.png',
+  'PRO1ENDO_CHEM_20': 'https://terragene.com/wp-content/uploads/PRO1-ENDO-Rev.1-B.png',
+  'bionova_cloud': 'https://terragene.com/wp-content/uploads/Bionova-Q-CSSD-Traceability-Software.png'
+};
+
 function generateRecommendations(){
   collectCurrentStep();
   const a = assessment;
@@ -1094,7 +1111,6 @@ function generateRecommendations(){
     const hasH2O2 = a.cssd.lowtemp?.has && a.cssd.lowtemp?.type==='h2o2';
 
     if(!ciClasses.includes('1')){
-      // Steam tape
       if(a.cssd.steam?.has){
         recs.push({
           cat:'Terragene — Sterilization Indicators',
@@ -1103,11 +1119,9 @@ function generateRecommendations(){
           reason:'Type 1 process indicator tape for sealing packs before steam sterilization. Changes from yellow to dark brown/black when exposed, providing immediate visual confirmation that a pack has been through the sterilizer.',
           standard:'ISO 11140-1 Type 1 — AS 5369 requires process exposure identification on every pack.',
           priority:'medium',
-          volume: steamCycles>0 ? `~${steamCycles*3*DAYS} uses/month (est. 3 packs per cycle x ${steamCycles} daily cycles)` : '',
           flowStep:'packaging'
         });
       }
-      // H2O2 tape
       if(hasH2O2){
         recs.push({
           cat:'Terragene — Sterilization Indicators',
@@ -1116,15 +1130,13 @@ function generateRecommendations(){
           reason:'Type 1 process indicator tape for hydrogen peroxide sterilization. Changes from purple to green when exposed, confirming the pack has been processed.',
           standard:'ISO 11140-1 Type 1 — AS 5369 requires process exposure identification.',
           priority:'medium',
-          volume: lowtempCycles>0 ? `~${lowtempCycles*3*DAYS} uses/month` : '',
           flowStep:'packaging'
         });
       }
     }
 
     if(!ciClasses.includes('2') && a.cssd.steam?.has && (a.cssd.steam?.type==='prevac'||a.cssd.steam?.type==='both')){
-      const gap = 'No Bowie-Dick (Type 2) test for pre-vacuum sterilizer — daily air removal test is a mandatory requirement.';
-      gaps.push(gap);
+      gaps.push('No Bowie-Dick (Type 2) test for pre-vacuum sterilizer — daily air removal test is a mandatory requirement.');
       recs.push({
         cat:'Terragene — Sterilization Indicators',
         product:'Chemdye BD125X/1 — Bowie-Dick Test Pack',
@@ -1132,7 +1144,6 @@ function generateRecommendations(){
         reason:'ISO 11140-5 Bowie-Dick test pack with early warning sheet for detecting air removal failures. Run daily in an empty pre-vacuum sterilizer before processing loads to verify the vacuum system is functioning correctly.',
         standard:'ISO 11140-1 Type 2 / ISO 11140-5 — AS 5369 mandates daily Bowie-Dick testing for pre-vacuum sterilizers.',
         priority:'high',
-        volume: a.cssd.steam?.count>0 ? `${a.cssd.steam.count} test(s)/day (1 per sterilizer) = ~${a.cssd.steam.count*DAYS}/month` : '1 per sterilizer per day',
         flowStep:'sterilizer_test'
       });
     }
@@ -1145,7 +1156,6 @@ function generateRecommendations(){
         reason:'Type 4 multi-variable chemical indicator strips placed inside packs before sterilization. Monitors two or more critical variables (time, temperature, steam presence) to verify conditions were met within the pack.',
         standard:'ISO 11140-1 Type 4 — recommended for routine in-pack monitoring per AS 5369.',
         priority:'medium',
-        volume: totalSterilCycles>0 ? `~${totalSterilCycles*DAYS} strips/month (1 per cycle) — 250 double / 500 single strips per box` : '',
         flowStep:'sterilization'
       });
     }
@@ -1158,7 +1168,6 @@ function generateRecommendations(){
         reason:'Type 5 integrating indicator that reacts to ALL critical sterilization variables. Performance correlates with biological indicator results, making it the most reliable chemical indicator for verifying sterilization conditions were achieved. Suitable for 121°C to 134°C steam cycles.',
         standard:'ISO 11140-1 Type 5 — AS 5369 recommends integrating indicators for critical load release decisions.',
         priority:'medium',
-        volume: totalSterilCycles>0 ? `~${totalSterilCycles*DAYS} strips/month — 200 per pack` : '',
         flowStep:'sterilization'
       });
     }
@@ -1171,7 +1180,6 @@ function generateRecommendations(){
         reason:'The highest class of chemical indicator. Cycle-specific Type 6 emulator that reacts to all critical variables for 134°C/3.5 min and 121°C/15 min steam cycles. Provides the closest chemical approximation to biological indicator verification.',
         standard:'ISO 11140-1 Type 6 — the most precise chemical indicator classification.',
         priority:'low',
-        volume: totalSterilCycles>0 ? `~${totalSterilCycles*DAYS} strips/month — 250 per pack` : '',
         flowStep:'sterilization'
       });
     }
@@ -1179,7 +1187,6 @@ function generateRecommendations(){
 
   /* ── Terragene Cleaning Verification ── */
   if(hasCSSD){
-    // Washer-disinfector cleaning indicator
     if(a.cssd.wd?.has){
       recs.push({
         cat:'Terragene — Cleaning Verification',
@@ -1188,12 +1195,10 @@ function generateRecommendations(){
         reason:'High-challenge cleaning performance indicator for washer-disinfectors. Placed in the washer to verify the cleaning cycle is effectively removing contamination. Fuchsia test soil is removed during effective cleaning — any remaining colour indicates a cleaning failure.',
         standard:'AS 5369 requires routine monitoring of washer-disinfector performance.',
         priority:'medium',
-        volume: a.cssd.wd.dailyCycles>0 ? `Routine testing — 200 per pack` : '',
         flowStep:'cleaning'
       });
     }
 
-    // Ultrasonic cleaning indicator
     if(a.cssd.ultra?.has){
       recs.push({
         cat:'Terragene — Cleaning Verification',
@@ -1202,23 +1207,19 @@ function generateRecommendations(){
         reason:'Monitors ultrasonic cavitation effectiveness to verify your ultrasonic cleaner is performing correctly. Detects all factors affecting cavitation at frequencies >= 35 kHz. Essential for routine performance checks.',
         standard:'AS 5369 requires validation and monitoring of ultrasonic cleaning processes.',
         priority:'medium',
-        volume: '30 per pack — use for daily/weekly performance checks',
         flowStep:'cleaning'
       });
     }
 
-    // Protein testing for instruments
+    // Protein testing — good practice, not mandatory
     if(a.consumables.hasProteinTest!=='yes'){
-      const isGap = a.consumables.hasProteinTest==='no';
-      if(isGap) gaps.push('No residual protein testing — cleaning validation is a critical step before sterilization.');
       recs.push({
         cat:'Terragene — Cleaning Verification',
         product:'PRO1 MiCRO — Surface Protein Detection Pen',
         sku:'PRO1MiCRO',
-        reason:'High-sensitivity pen system for quantifying residual protein on instrument surfaces. Swab the surface, incubate for 7 minutes, and read results visually or with a Bionova auto-reader. Detects inadequate cleaning before instruments enter the sterilizer.',
-        standard:'AS 5369 requires validation and routine monitoring of the cleaning process.',
-        priority: isGap?'high':'medium',
-        volume: '',
+        reason:'High-sensitivity pen system for quantifying residual protein on instrument surfaces. Swab the surface, incubate for 7 minutes, and read results visually or with a Bionova auto-reader. A valuable quality assurance tool for verifying cleaning effectiveness.',
+        standard:'Residual protein testing is recommended as good practice under AS 5369 for cleaning quality assurance.',
+        priority:'low',
         flowStep:'cleaning_verify'
       });
     }
@@ -1230,10 +1231,9 @@ function generateRecommendations(){
       cat:'Terragene — Endoscopy Verification',
       product:'Chemdye KPRO2-E250 — Endoscope Protein Testing',
       sku:'KPRO2-E250',
-      reason:'Hygiene monitoring system designed specifically for endoscopes. A high-absorption swab is passed through the endoscope channel, then placed in a reactive solution to detect as little as 1 microgram of residual protein. Confirms cleaning was effective before disinfection.',
-      standard:'AS 5369 requires cleaning verification for endoscope reprocessing.',
-      priority:'high',
-      volume: `250 tests per kit`,
+      reason:'Hygiene monitoring system designed specifically for endoscopes. A high-absorption swab is passed through the endoscope channel, then placed in a reactive solution to detect as little as 1 microgram of residual protein. A good practice quality assurance step to verify cleaning effectiveness.',
+      standard:'GENCA/GESA Infection Prevention and Control in Endoscopy guidelines recommend cleaning verification as part of quality assurance. AS 5369 supports routine cleaning monitoring.',
+      priority:'low',
       flowStep:'cleaning_verify'
     });
     recs.push({
@@ -1241,9 +1241,8 @@ function generateRecommendations(){
       product:'PRO1 ENDO — Quantitative Endoscope Protein System',
       sku:'PRO1ENDO_CHEM_20',
       reason:'Advanced quantitative protein detection system for cannulated endoscope channels. Provides results in the 1–50 microgram range with a 0.5 microgram detection limit. Used with Bionova auto-readers for documented, traceable results.',
-      standard:'AS 5369 / ISO 15883 — cleaning validation for endoscope reprocessing.',
-      priority:'medium',
-      volume: '20 tests per pack',
+      standard:'GENCA/GESA guidelines support quantitative cleaning verification for endoscope reprocessing quality assurance.',
+      priority:'low',
       flowStep:'cleaning_verify'
     });
   }
@@ -1266,7 +1265,6 @@ function generateRecommendations(){
         'Real-time dashboards give management oversight of every sterilization cycle and consumable result.',
       standard:'AS 5369 requires documented evidence of reprocessing. Bionova Cloud provides automated, tamper-proof digital records that satisfy audit requirements.',
       priority: traceChallenges?'high':'medium',
-      volume: '',
       isFeature: true
     });
   }
@@ -1293,7 +1291,6 @@ function generateRecommendations(){
           reason: detReason,
           standard:'AS 5369 requires validated cleaning chemistry for automated reprocessing.',
           priority: a.consumables.hasDetergent==='no'?'high':'medium',
-          volume: wdCycles>0 ? `Based on ~${wdCycles} daily WD cycles (per machine) — contact us for dosage calculation` : '',
           flowStep:'auto_clean'
         });
 
@@ -1307,7 +1304,6 @@ function generateRecommendations(){
           reason: dryReason,
           standard:'AS 5369 requires instruments to be thoroughly dried before packaging and sterilization.',
           priority: (rinseNeut==='none')?'medium':'low',
-          volume: wdCycles>0 ? `Based on ~${wdCycles} daily WD cycles (per machine) — contact us for dosage calculation` : '',
           flowStep:'auto_clean'
         });
       }
@@ -1318,7 +1314,6 @@ function generateRecommendations(){
         reason:'ManualMax is an enzymatic detergent for manual pre-cleaning and soaking of surgical instruments. Essential for the initial decontamination step before automated processing.',
         standard:'AS 5369 requires a validated manual cleaning process as part of the reprocessing workflow.',
         priority:'medium',
-        volume: '',
         flowStep:'manual_clean'
       });
 
@@ -1329,7 +1324,6 @@ function generateRecommendations(){
           reason:'SonicMax is specifically formulated for ultrasonic cleaners, working synergistically with cavitation to remove contaminants from complex instrument geometries and lumens.',
           standard:'AS 5369 requires validated chemistry for ultrasonic cleaning processes.',
           priority:'medium',
-          volume: a.cssd.ultra.dailyCycles>0 ? `Based on ~${a.cssd.ultra.dailyCycles} daily ultrasonic cycles` : '',
           flowStep:'auto_clean'
         });
       }
@@ -1347,11 +1341,10 @@ function generateRecommendations(){
       recs.push({
         cat:'Meditech Endoscopy',
         product:'StageOne — Endoscope Bedside Pre-Cleaning Kit',
-        reason:'StageOne is a bedside pre-cleaning kit used immediately after each procedure. Per GENCA guidelines, prompt pre-cleaning at the point of use prevents biofilm formation and organic material from drying onto endoscope channels. ' +
+        reason:'StageOne is a bedside pre-cleaning kit used immediately after each procedure. Per GENCA/GESA Infection Prevention and Control in Endoscopy guidelines, prompt pre-cleaning at the point of use prevents biofilm formation and organic material from drying onto endoscope channels. ' +
           (bedsideCleaning==='no'?'You indicated you do not currently use a bedside cleaning kit — this is a critical gap in endoscope reprocessing.':''),
-        standard:'AS 5369 and GENCA guidelines require immediate pre-cleaning at the point of use.',
+        standard:'AS 5369 and GENCA/GESA guidelines require immediate pre-cleaning at the point of use.',
         priority: bedsideCleaning==='no'?'high':'medium',
-        volume: procs>0 ? `~${procs*DAYS} kits/month (${procs} daily procedures)` : '',
         flowStep:'endo_preclean'
       });
       if(bedsideCleaning==='no') gaps.push('No bedside pre-cleaning kit for endoscopes — AS 5369 and GENCA require immediate pre-cleaning at point of use.');
@@ -1360,9 +1353,8 @@ function generateRecommendations(){
         cat:'Meditech Endoscopy',
         product:'StageOne — Endoscope Bedside Pre-Cleaning Kit',
         reason:'StageOne is a comprehensive bedside pre-cleaning kit for endoscopes. You currently use a bedside cleaning kit — StageOne offers an all-in-one solution with enzymatic detergent, sponges, and channel cleaning tools in a single pack.',
-        standard:'AS 5369 and GENCA guidelines require immediate pre-cleaning at the point of use.',
+        standard:'AS 5369 and GENCA/GESA guidelines require immediate pre-cleaning at the point of use.',
         priority:'low',
-        volume: procs>0 ? `~${procs*DAYS} kits/month (${procs} daily procedures)` : '',
         flowStep:'endo_preclean'
       });
     }
@@ -1372,10 +1364,9 @@ function generateRecommendations(){
       cat:'Meditech Endoscopy',
       product:'AquaBlue — Endoscope Cleaning Solution',
       reason:'AquaBlue is a dedicated endoscope cleaning detergent for manual and automated reprocessing. Formulated for compatibility with all major endoscope and AER brands.' +
-        (!endoSteps.includes('detergent_soak')?' You indicated you may not be soaking scopes in detergent — this is a recommended step per GENCA guidelines.':''),
-      standard:'AS 5369 requires validated cleaning chemistry specific to endoscope reprocessing.',
+        (!endoSteps.includes('detergent_soak')?' You indicated you may not be soaking scopes in detergent — GENCA/GESA guidelines require full immersion in enzymatic detergent during manual cleaning.':''),
+      standard:'AS 5369 and GENCA/GESA Infection Prevention and Control in Endoscopy guidelines require validated cleaning chemistry.',
       priority:'medium',
-      volume: procs>0 ? `Based on ~${procs} daily procedures — contact us for volume calculation` : '',
       flowStep:'endo_clean'
     });
 
@@ -1384,18 +1375,17 @@ function generateRecommendations(){
       cat:'Meditech Endoscopy',
       product:'ProTech Tip Protectors',
       reason:'ProTech tip protectors safeguard delicate endoscope distal tips during transport and storage, preventing costly damage. Endoscope tip repair is one of the most common and expensive maintenance items.',
-      standard:'Best practice for endoscope handling and transport — protects your investment.',
+      standard:'GENCA/GESA guidelines emphasise careful handling during transport and storage to prevent damage.',
       priority:'low',
-      volume: procs>0 ? `Based on ~${procs} daily procedures` : '',
       flowStep:'endo_storage'
     });
 
     // Flag missing reprocessing steps
     if(!endoSteps.includes('leak_test')){
-      gaps.push('Leak test not performed before AER — GENCA and AS 5369 require a leak test prior to automated reprocessing to detect scope damage.');
+      gaps.push('Leak test not performed before AER — GENCA/GESA Infection Prevention and Control in Endoscopy guidelines and AS 5369 require a leak test prior to automated reprocessing to detect scope damage.');
     }
     if(!endoSteps.includes('brush_channels')){
-      gaps.push('Channel brushing not performed — GENCA guidelines recommend brushing all accessible channels during manual cleaning to remove debris.');
+      gaps.push('Channel brushing not performed — GENCA/GESA guidelines recommend brushing all accessible channels during manual cleaning to remove debris.');
     }
   }
 
@@ -1568,9 +1558,7 @@ function renderRecommendations(recs, gaps){
         ${snap.wdCyclesMonth>0?`<div class="snapshot-item"><div class="snap-value">${snap.wdCyclesMonth.toLocaleString()}</div><div class="snap-label">WD Cycles / Month</div></div>`:''}
         ${snap.ultraCyclesMonth>0?`<div class="snapshot-item"><div class="snap-value">${snap.ultraCyclesMonth.toLocaleString()}</div><div class="snap-label">Ultrasonic Cycles / Month</div></div>`:''}
         ${snap.endoProceduresMonth>0?`<div class="snapshot-item"><div class="snap-value">${snap.endoProceduresMonth.toLocaleString()}</div><div class="snap-label">Endoscopy Procedures / Month</div></div>`:''}
-        ${snap.ciPerMonth>0?`<div class="snapshot-item highlight"><div class="snap-value">~${snap.ciPerMonth.toLocaleString()}</div><div class="snap-label">Est. Chemical Indicators / Month</div></div>`:''}
         ${snap.bdTestsMonth>0?`<div class="snapshot-item ${snap.noBowieDick?'warn':''}"><div class="snap-value">${snap.bdTestsMonth}</div><div class="snap-label">Bowie-Dick Tests / Month</div></div>`:''}
-        ${snap.chemDosesMonth>0?`<div class="snapshot-item highlight"><div class="snap-value">~${snap.chemDosesMonth.toLocaleString()}</div><div class="snap-label">Est. Chemistry Doses / Month</div></div>`:''}
       </div>
       <div style="margin-top:12px;font-size:12px;color:var(--gray-500)">
         Based on ${snap.workingDays} working days/month. Volumes are estimates for quoting purposes.
@@ -1592,7 +1580,10 @@ function renderRecommendations(recs, gaps){
   const bionovaRec = recs.find(r=>r.isFeature);
   if(bionovaRec){
     html += `<div class="feature-card">
-      <h3>Recommended: Bionova Cloud</h3>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+        <img src="${PRODUCT_IMAGES['bionova_cloud']}" alt="Bionova Cloud" style="height:60px;object-fit:contain" loading="lazy">
+        <h3 style="margin:0">Recommended: Bionova Cloud</h3>
+      </div>
       <p>${esc(bionovaRec.reason)}</p>
       <div class="feature-list">
         <span class="feature-tag">Automated Result Reading</span>
@@ -1612,15 +1603,16 @@ function renderRecommendations(recs, gaps){
       currentCat=r.cat;
       html+=`<div class="rec-category">${esc(r.cat)}</div>`;
     }
+    const imgUrl = PRODUCT_IMAGES[r.sku]||'';
     html+=`<div class="rec-card ${r.priority}">
       <div class="rec-card-header">
         <div><h3>${esc(r.product)}</h3>${r.sku?`<div class="rec-sku">SKU: ${esc(r.sku)}</div>`:''}</div>
         <span class="badge badge-${r.priority==='high'?'red':r.priority==='medium'?'amber':'blue'}">${r.priority}</span>
       </div>
       <div class="rec-card-body">
+        ${imgUrl?`<div class="rec-img"><img src="${imgUrl}" alt="${esc(r.product)}" loading="lazy"></div>`:''}
         <p>${esc(r.reason)}</p>
         <div class="rec-standard">${esc(r.standard)}</div>
-        ${r.volume?`<div class="rec-volume">Estimated volume: ${esc(r.volume)}</div>`:''}
       </div>
     </div>`;
   });
@@ -1634,9 +1626,16 @@ function renderRecommendations(recs, gaps){
 
   // Action buttons
   html += `<div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap" class="no-print">
-    <button class="btn btn-success" onclick="emailResults()" style="flex:1;min-width:200px;justify-content:center">Email Results to Sales</button>
+    <button class="btn btn-success" onclick="submitAssessment()" style="flex:1;min-width:200px;justify-content:center" id="submitBtn">Submit Assessment</button>
+    <button class="btn btn-secondary" onclick="copyResultsToClipboard()" style="flex:1;min-width:200px;justify-content:center">Copy Results</button>
     <button class="btn btn-secondary" onclick="window.print()" style="flex:1;min-width:200px;justify-content:center">Print Summary</button>
-    <button class="btn btn-primary" onclick="exportJSON()" style="flex:1;min-width:200px;justify-content:center">Export JSON</button>
+  </div>
+  <div id="submitStatus" style="margin-top:12px;text-align:center;display:none"></div>`;
+
+  // GENCA reference footer
+  html += `<div class="info-box" style="margin-top:20px">
+    <strong>References</strong><br>
+    This assessment is aligned with <strong>AS 5369:2023</strong> (Reprocessing of reusable medical devices) and <strong>GENCA/GESA Infection Prevention and Control in Endoscopy</strong> (2025 Update) guidelines. Chemical indicator classifications per <strong>ISO 11140-1</strong>.
   </div>`;
 
   document.getElementById('recommendationsOutput').innerHTML=html;
@@ -1652,121 +1651,157 @@ function formatTraceability(t){
   return map[t]||'—';
 }
 
-/* ──────── Email ──────── */
-function emailResults(){
-  collectCurrentStep();
-  if(currentStep!==6) generateRecommendations();
+/* ──────── Submission ──────── */
+// Google Apps Script Web App URL — set this after deploying the script
+const SUBMIT_URL = ''; // Paste your Google Apps Script web app URL here
+
+function buildResultsText(){
   const a = assessment;
-  const nl = '%0D%0A';
+  const nl = '\n';
   const hr = '────────────────────────────────';
-  let body = '';
+  let t = '';
 
-  body += `MACEMARK TECHNOLOGY — FACILITY ASSESSMENT${nl}`;
-  body += `Date: ${new Date().toLocaleDateString('en-AU')}${nl}`;
-  body += `${hr}${nl}${nl}`;
+  t += `MACEMARK TECHNOLOGY — FACILITY ASSESSMENT${nl}`;
+  t += `Date: ${new Date().toLocaleDateString('en-AU')}${nl}`;
+  t += `${hr}${nl}${nl}`;
 
-  body += `FACILITY PROFILE${nl}`;
-  body += `Name: ${a.facility.name||'—'}${nl}`;
-  body += `Contact: ${a.facility.contactPerson||'—'}${nl}`;
-  body += `Email: ${a.facility.contactEmail||'—'}${nl}`;
-  body += `Phone: ${a.facility.contactPhone||'—'}${nl}`;
-  body += `Type: ${formatFacilityType(a.facility.facilityType)}${nl}`;
-  body += `Staff: ${a.facility.staffCount||'—'}${nl}${nl}`;
-
-  // Quick Consumption Snapshot
-  const snap = calcConsumptionSnapshot(a);
-  body += `${hr}${nl}`;
-  body += `MONTHLY CONSUMPTION SNAPSHOT (est. ${snap.workingDays} working days)${nl}`;
-  body += `${hr}${nl}`;
-  if(snap.steamCyclesMonth>0) body += `  Steam Sterilizer Cycles:  ${snap.steamCyclesMonth.toLocaleString()}/month${nl}`;
-  if(snap.lowtempCyclesMonth>0) body += `  Low-Temp Cycles:          ${snap.lowtempCyclesMonth.toLocaleString()}/month${nl}`;
-  if(snap.wdCyclesMonth>0) body += `  WD Cycles:                ${snap.wdCyclesMonth.toLocaleString()}/month${nl}`;
-  if(snap.ultraCyclesMonth>0) body += `  Ultrasonic Cycles:        ${snap.ultraCyclesMonth.toLocaleString()}/month${nl}`;
-  if(snap.endoProceduresMonth>0) body += `  Endoscopy Procedures:     ${snap.endoProceduresMonth.toLocaleString()}/month${nl}`;
-  if(snap.ciPerMonth>0) body += `  Est. Chemical Indicators: ~${snap.ciPerMonth.toLocaleString()}/month${nl}`;
-  if(snap.bdTestsMonth>0) body += `  Bowie-Dick Tests:         ${snap.bdTestsMonth}/month${nl}`;
-  if(snap.chemDosesMonth>0) body += `  Est. Chemistry Doses:     ~${snap.chemDosesMonth.toLocaleString()}/month${nl}`;
-  const bundleMap = {yes:'YES — Interested',maybe:'Wants More Info',no:'Not at this time'};
-  body += `  Bundled Supply Interest:  ${bundleMap[a.compliance?.bundling]||'Not answered'}${nl}`;
-  body += nl;
+  t += `FACILITY PROFILE${nl}`;
+  t += `Name: ${a.facility.name||'—'}${nl}`;
+  t += `Contact: ${a.facility.contactPerson||'—'}${nl}`;
+  t += `Email: ${a.facility.contactEmail||'—'}${nl}`;
+  t += `Phone: ${a.facility.contactPhone||'—'}${nl}`;
+  t += `Type: ${formatFacilityType(a.facility.facilityType)}${nl}`;
+  t += `Staff: ${a.facility.staffCount||'—'}${nl}${nl}`;
 
   if(a.facility.facilityType!=='endoscopy' && a.cssd){
-    body += `CSSD EQUIPMENT${nl}`;
-    if(a.cssd.steam?.has) body += `Steam Sterilizers: ${a.cssd.steam.count}x ${a.cssd.steam.brand} (${a.cssd.steam.type}) ~${a.cssd.steam.dailyCycles} cycles/day${nl}`;
-    if(a.cssd.lowtemp?.has) body += `Low-Temp Sterilizers: ${a.cssd.lowtemp.count}x ${a.cssd.lowtemp.brand} (${a.cssd.lowtemp.type}) ~${a.cssd.lowtemp.dailyCycles} cycles/day${nl}`;
-    if(a.cssd.wd?.has) body += `Washer-Disinfectors: ${a.cssd.wd.count}x ${a.cssd.wd.brand} ~${a.cssd.wd.dailyCycles} cycles/day${nl}`;
-    if(a.cssd.ultra?.has) body += `Ultrasonic Cleaners: ${a.cssd.ultra.count}x ~${a.cssd.ultra.dailyCycles} cycles/day${nl}`;
-    body += `Traceability: ${formatTraceability(a.cssd.traceability)}${nl}`;
-    if(a.cssd.standard) body += `Standard/Goals: ${a.cssd.standard}${nl}`;
-    body += nl;
+    t += `CSSD EQUIPMENT${nl}`;
+    if(a.cssd.steam?.has) t += `Steam Sterilizers: ${a.cssd.steam.count}x ${a.cssd.steam.brand} (${a.cssd.steam.type}) ~${a.cssd.steam.dailyCycles} cycles/day per machine${nl}`;
+    if(a.cssd.lowtemp?.has) t += `Low-Temp Sterilizers: ${a.cssd.lowtemp.count}x ${a.cssd.lowtemp.brand} (${a.cssd.lowtemp.type}) ~${a.cssd.lowtemp.dailyCycles} cycles/day per machine${nl}`;
+    if(a.cssd.wd?.has) t += `Washer-Disinfectors: ${a.cssd.wd.count}x ${a.cssd.wd.brand} ~${a.cssd.wd.dailyCycles} cycles/day per machine${nl}`;
+    if(a.cssd.ultra?.has) t += `Ultrasonic Cleaners: ${a.cssd.ultra.count}x ~${a.cssd.ultra.dailyCycles} cycles/day per machine${nl}`;
+    t += `Traceability: ${formatTraceability(a.cssd.traceability)}${nl}${nl}`;
   }
 
   if(['endoscopy','combined','day_surgery'].includes(a.facility.facilityType) && a.endoscopy){
-    body += `ENDOSCOPY${nl}`;
-    body += `AERs: ${a.endoscopy.aerCount||0}x ${a.endoscopy.aerBrand||'—'}${nl}`;
-    body += `Daily Procedures: ~${a.endoscopy.dailyProcedures||0}${nl}`;
-    body += `Bedside Cleaning Kit: ${a.endoscopy.bedsideCleaning==='yes'?'Yes':a.endoscopy.bedsideCleaning==='no'?'No':'—'}${nl}`;
+    t += `ENDOSCOPY${nl}`;
+    t += `AERs: ${a.endoscopy.aerCount||0}x ${a.endoscopy.aerBrand||'—'}${nl}`;
+    t += `Daily Procedures: ~${a.endoscopy.dailyProcedures||0}${nl}`;
+    t += `Bedside Cleaning Kit: ${a.endoscopy.bedsideCleaning==='yes'?'Yes':a.endoscopy.bedsideCleaning==='no'?'No':'—'}${nl}`;
     const stepLabels = {detergent_soak:'Soak in detergent',scope_flush:'Channel flush',brush_channels:'Brush channels',leak_test:'Leak test',rinse_before_aer:'Rinse before AER'};
-    body += `Reprocessing Steps: ${(a.endoscopy.endoSteps||[]).map(s=>stepLabels[s]||s).join(', ')||'None specified'}${nl}`;
-    body += `Traceability: ${formatTraceability(a.endoscopy?.traceability)}${nl}${nl}`;
+    t += `Reprocessing Steps: ${(a.endoscopy.endoSteps||[]).map(s=>stepLabels[s]||s).join(', ')||'None specified'}${nl}`;
+    t += `Traceability: ${formatTraceability(a.endoscopy?.traceability)}${nl}${nl}`;
   }
 
-  body += `CURRENT CONSUMABLES${nl}`;
-  body += `Chemistry Brand: ${a.consumables.chemistry||'—'}${nl}`;
-  body += `Detergent: ${a.consumables.hasDetergent==='yes'?'Yes ('+( a.consumables.detergentType||'type not specified')+')':a.consumables.hasDetergent||'—'}${nl}`;
-  body += `Rinse/Neutraliser: ${a.consumables.rinseNeutraliser||'—'}${a.consumables.neutraliserPurpose?' ('+a.consumables.neutraliserPurpose+')':''}${nl}`;
-  body += `CI Classes: ${(a.consumables.ciClasses||[]).join(', ')||'None'}${nl}`;
-  body += `CI Brand: ${a.consumables.ciBrand||'—'}${nl}`;
-  body += `PCDs: ${a.consumables.hasPCD||'—'}${nl}`;
-  body += `Protein Testing: ${a.consumables.hasProteinTest||'—'}${nl}`;
-  body += `Result Recording: ${formatTraceability(a.consumables.resultRecording)}${nl}${nl}`;
+  t += `CURRENT CONSUMABLES${nl}`;
+  t += `Chemistry Brand: ${a.consumables.chemistry||'—'}${nl}`;
+  t += `Detergent: ${a.consumables.hasDetergent==='yes'?'Yes ('+(a.consumables.detergentType||'type not specified')+')':a.consumables.hasDetergent||'—'}${nl}`;
+  t += `Rinse/Neutraliser: ${a.consumables.rinseNeutraliser||'—'}${a.consumables.neutraliserPurpose?' ('+a.consumables.neutraliserPurpose+')':''}${nl}`;
+  t += `CI Types: ${(a.consumables.ciClasses||[]).join(', ')||'None'}${nl}`;
+  t += `CI Brand: ${a.consumables.ciBrand||'—'}${nl}`;
+  t += `PCDs: ${a.consumables.hasPCD||'—'}${nl}`;
+  t += `Protein Testing: ${a.consumables.hasProteinTest||'—'}${nl}`;
+  t += `Result Recording: ${formatTraceability(a.consumables.resultRecording)}${nl}${nl}`;
 
-  body += `COMPLIANCE${nl}`;
-  body += `AS 5369 Status: ${a.compliance.status||'—'}${nl}`;
-  if(a.compliance.auditFindings) body += `Audit Findings: ${a.compliance.auditFindings}${nl}`;
-  if((a.compliance.challenges||[]).length>0) body += `Challenges: ${a.compliance.challenges.join(', ')}${nl}`;
-  if((a.compliance.aspirations||[]).length>0) body += `Goals: ${a.compliance.aspirations.join(', ')}${nl}`;
-  if(a.compliance.notes) body += `Notes: ${a.compliance.notes}${nl}`;
-  body += nl;
+  t += `COMPLIANCE${nl}`;
+  t += `AS 5369 Status: ${a.compliance.status||'—'}${nl}`;
+  if(a.compliance.auditFindings) t += `Audit Findings: ${a.compliance.auditFindings}${nl}`;
+  if((a.compliance.challenges||[]).length>0) t += `Challenges: ${a.compliance.challenges.join(', ')}${nl}`;
+  if((a.compliance.aspirations||[]).length>0) t += `Goals: ${a.compliance.aspirations.join(', ')}${nl}`;
+  if(a.compliance.bundling) t += `Bundling Interest: ${a.compliance.bundling}${nl}`;
+  if(a.compliance.notes) t += `Notes: ${a.compliance.notes}${nl}`;
+  t += nl;
 
   if((a.gaps||[]).length>0){
-    body += `⚠ COMPLIANCE GAPS${nl}`;
-    a.gaps.forEach(g => body += `• ${g}${nl}`);
-    body += nl;
+    t += `⚠ COMPLIANCE GAPS${nl}`;
+    a.gaps.forEach(g => t += `• ${g}${nl}`);
+    t += nl;
   }
 
-  body += `${hr}${nl}RECOMMENDATIONS${nl}${hr}${nl}${nl}`;
+  t += `${hr}${nl}RECOMMENDATIONS${nl}${hr}${nl}${nl}`;
   let cat='';
   (a.recommendations||[]).forEach(r=>{
-    if(r.cat!==cat){ cat=r.cat; body+=`--- ${r.cat} ---${nl}`; }
-    body += `[${r.priority.toUpperCase()}] ${r.product}${nl}`;
-    body += `${r.reason}${nl}`;
-    body += `Standard: ${r.standard}${nl}`;
-    if(r.volume) body += `Volume: ${r.volume}${nl}`;
-    body += nl;
+    if(r.isFeature) return;
+    if(r.cat!==cat){ cat=r.cat; t+=`--- ${r.cat} ---${nl}`; }
+    t += `[${r.priority.toUpperCase()}] ${r.product}${nl}`;
+    t += `${r.reason}${nl}`;
+    t += `Standard: ${r.standard}${nl}${nl}`;
   });
 
-  const subject = encodeURIComponent(`Facility Assessment — ${a.facility.name||'New Assessment'} — ${new Date().toLocaleDateString('en-AU')}`);
-
-  // mailto has URL length limits (~2000 chars). If body is very long, truncate with a note.
-  let encodedBody = body;
-  const mailto = `mailto:sales@sess.com.au?subject=${subject}&body=${encodedBody}`;
-
-  // Try mailto first
-  window.location.href = mailto;
+  return t;
 }
 
-/* ──────── Export JSON ──────── */
-function exportJSON(){
+async function submitAssessment(){
   collectCurrentStep();
   if(currentStep!==6) generateRecommendations();
-  const blob = new Blob([JSON.stringify(assessment, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `assessment-${(assessment.facility.name||'export').replace(/[^a-zA-Z0-9]/g,'-')}-${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+  const btn = document.getElementById('submitBtn');
+  const status = document.getElementById('submitStatus');
+
+  if(!SUBMIT_URL){
+    // Fallback: copy to clipboard + show message
+    await copyResultsToClipboard();
+    status.style.display='block';
+    status.innerHTML='<div style="padding:12px;background:var(--amber-light);border-radius:var(--radius);color:var(--amber)"><strong>Submission endpoint not configured.</strong> Results have been copied to your clipboard — paste into an email to <strong>sales@sess.com.au</strong></div>';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+  status.style.display='block';
+  status.innerHTML='<div style="color:var(--gray-500)">Sending assessment...</div>';
+
+  try {
+    const payload = {
+      timestamp: new Date().toISOString(),
+      facility: assessment.facility,
+      cssd: assessment.cssd,
+      endoscopy: assessment.endoscopy,
+      consumables: assessment.consumables,
+      compliance: assessment.compliance,
+      gaps: assessment.gaps,
+      recommendations: (assessment.recommendations||[]).map(r=>({product:r.product,priority:r.priority,cat:r.cat})),
+      summary: buildResultsText()
+    };
+
+    const resp = await fetch(SUBMIT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+
+    btn.textContent = '✓ Submitted';
+    btn.style.background = 'var(--green)';
+    status.innerHTML = '<div style="padding:12px;background:var(--green-light);border-radius:var(--radius);color:var(--green)"><strong>Assessment submitted successfully!</strong> Our team will review your results and be in touch.</div>';
+  } catch(err){
+    btn.disabled = false;
+    btn.textContent = 'Submit Assessment';
+    status.innerHTML = '<div style="padding:12px;background:var(--red-light);border-radius:var(--radius);color:var(--red)"><strong>Submission failed.</strong> Please use "Copy Results" and email to sales@sess.com.au</div>';
+  }
+}
+
+async function copyResultsToClipboard(){
+  collectCurrentStep();
+  if(currentStep!==6) generateRecommendations();
+  const text = buildResultsText();
+  try {
+    await navigator.clipboard.writeText(text);
+    const status = document.getElementById('submitStatus');
+    status.style.display='block';
+    status.innerHTML='<div style="padding:12px;background:var(--green-light);border-radius:var(--radius);color:var(--green)">Results copied to clipboard!</div>';
+    setTimeout(()=>{status.style.display='none'},3000);
+  } catch(e){
+    // Fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const status = document.getElementById('submitStatus');
+    status.style.display='block';
+    status.innerHTML='<div style="padding:12px;background:var(--green-light);border-radius:var(--radius);color:var(--green)">Results copied to clipboard!</div>';
+    setTimeout(()=>{status.style.display='none'},3000);
+  }
 }
 
 /* ──────── Init ──────── */
