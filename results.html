@@ -6,20 +6,20 @@
 <title>Macemark — Assessment Results</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--navy:#1b3a5c;--navy-dark:#0f2640;--blue:#2563eb;--blue-light:#dbeafe;--green:#057a55;--green-light:#d1fae5;--amber:#b45309;--amber-light:#fef3c7;--red:#c81e1e;--red-light:#fde8e8;--purple:#6d28d9;--gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-300:#d1d5db;--gray-400:#9ca3af;--gray-500:#6b7280;--gray-600:#4b5563;--gray-700:#374151;--gray-800:#1f2937;--white:#fff;--radius:8px;--shadow:0 1px 3px rgba(0,0,0,.1)}
+:root{--navy:#1b3a5c;--navy-dark:#0f2640;--blue:#2563eb;--blue-light:#dbeafe;--green:#057a55;--green-light:#d1fae5;--amber:#b45309;--amber-light:#fef3c7;--red:#c81e1e;--red-light:#fde8e8;--purple:#6d28d9;--purple-light:#ede9fe;--gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-300:#d1d5db;--gray-400:#9ca3af;--gray-500:#6b7280;--gray-600:#4b5563;--gray-700:#374151;--gray-800:#1f2937;--white:#fff;--radius:8px;--shadow:0 1px 3px rgba(0,0,0,.1)}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--gray-50);color:var(--gray-800);line-height:1.5}
 header{background:var(--navy);color:var(--white);padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
 header h1{font-size:17px;font-weight:700;letter-spacing:3px;text-transform:uppercase}
 header .subtitle{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
 header a{color:rgba(255,255,255,.7);font-size:13px;text-decoration:none}
 header a:hover{color:var(--white)}
-main{max-width:1100px;margin:0 auto;padding:20px}
+main{max-width:1200px;margin:0 auto;padding:20px}
 
 /* Stats bar */
 .stats{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
-.stat-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 20px;flex:1;min-width:140px}
+.stat-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 20px;flex:1;min-width:120px}
 .stat-value{font-size:28px;font-weight:700;color:var(--navy)}
-.stat-label{font-size:12px;color:var(--gray-500);text-transform:uppercase;letter-spacing:1px}
+.stat-label{font-size:11px;color:var(--gray-500);text-transform:uppercase;letter-spacing:1px}
 
 /* Toolbar */
 .toolbar{display:flex;gap:12px;margin-bottom:16px;align-items:center;flex-wrap:wrap}
@@ -29,7 +29,7 @@ main{max-width:1100px;margin:0 auto;padding:20px}
 .count{font-size:13px;color:var(--gray-500);white-space:nowrap}
 
 /* Table */
-.table-wrap{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.table-wrap{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:14px}
 thead{background:var(--navy);color:var(--white)}
 th{padding:10px 14px;text-align:left;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
@@ -41,6 +41,9 @@ tr{cursor:pointer}
 .badge-gaps{background:var(--amber-light);color:var(--amber)}
 .badge-ok{background:var(--green-light);color:var(--green)}
 .badge-type{background:var(--blue-light);color:var(--blue)}
+.badge-new{background:var(--blue-light);color:var(--blue)}
+.badge-quoted{background:var(--green-light);color:var(--green)}
+.badge-archived{background:var(--gray-200);color:var(--gray-500)}
 .td-name{font-weight:600}
 .td-contact{color:var(--gray-500);font-size:13px}
 .td-date{color:var(--gray-400);font-size:13px;white-space:nowrap}
@@ -67,10 +70,23 @@ tr{cursor:pointer}
 .detail-rec.medium{border-left-color:var(--amber)}
 .detail-rec .rec-name{font-weight:600}
 .detail-rec .rec-reason{color:var(--gray-600);margin-top:2px}
-.detail-actions{display:flex;gap:12px;padding:16px 20px;border-top:1px solid var(--gray-100);background:var(--gray-50)}
-.btn{padding:9px 18px;border-radius:var(--radius);border:none;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px}
+.detail-actions{display:flex;gap:10px;padding:16px 20px;border-top:1px solid var(--gray-100);background:var(--gray-50);flex-wrap:wrap}
+.btn{padding:9px 18px;border-radius:var(--radius);border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
 .btn-primary{background:var(--blue);color:var(--white)}
+.btn-primary:hover{background:var(--navy)}
+.btn-success{background:var(--green);color:var(--white)}
+.btn-success:hover{background:#046c4e}
+.btn-amber{background:var(--amber);color:var(--white)}
+.btn-amber:hover{background:#92400e}
 .btn-secondary{background:var(--white);color:var(--gray-700);border:1px solid var(--gray-200)}
+.btn-secondary:hover{background:var(--gray-50)}
+.btn-danger{background:var(--white);color:var(--gray-400);border:1px solid var(--gray-200)}
+.btn-danger:hover{background:var(--gray-100);color:var(--gray-600)}
+
+/* Status actions in detail */
+.status-bar{display:flex;gap:8px;align-items:center;padding:12px 20px;background:var(--gray-50);border-bottom:1px solid var(--gray-100)}
+.status-bar .current-status{font-size:13px;color:var(--gray-500);margin-right:auto}
+.status-bar .current-status strong{color:var(--gray-800)}
 
 /* Empty state */
 .empty{text-align:center;padding:60px 20px;color:var(--gray-400)}
@@ -80,7 +96,7 @@ tr{cursor:pointer}
 
 /* Print */
 @media print{
-  header,.toolbar,.stats,.detail-actions,.detail-close{display:none!important}
+  header,.toolbar,.stats,.detail-actions,.detail-close,.status-bar{display:none!important}
   .overlay{position:static;background:none;padding:0}
   .detail-panel{box-shadow:none;margin:0}
 }
@@ -89,7 +105,8 @@ tr{cursor:pointer}
 @media(max-width:768px){
   .detail-grid{grid-template-columns:1fr;gap:2px}
   .detail-grid .label{color:var(--gray-400);font-size:12px}
-  th:nth-child(n+4),td:nth-child(n+4){display:none}
+  th:nth-child(n+5),td:nth-child(n+5){display:none}
+  .detail-actions{flex-direction:column}
 }
 </style>
 </head>
@@ -108,9 +125,10 @@ tr{cursor:pointer}
   </div>
 
   <div class="stats" id="statsBar">
-    <div class="stat-card"><div class="stat-value" id="statTotal">—</div><div class="stat-label">Total Assessments</div></div>
+    <div class="stat-card"><div class="stat-value" id="statTotal">—</div><div class="stat-label">Total</div></div>
+    <div class="stat-card"><div class="stat-value" id="statNew">—</div><div class="stat-label">New</div></div>
+    <div class="stat-card"><div class="stat-value" id="statQuoted">—</div><div class="stat-label">Quoted</div></div>
     <div class="stat-card"><div class="stat-value" id="statGaps">—</div><div class="stat-label">With Gaps</div></div>
-    <div class="stat-card"><div class="stat-value" id="statBundling">—</div><div class="stat-label">Bundling Interest</div></div>
     <div class="stat-card"><div class="stat-value" id="statRecent">—</div><div class="stat-label">Last 7 Days</div></div>
   </div>
 
@@ -124,6 +142,12 @@ tr{cursor:pointer}
       <option value="endoscopy">Endoscopy</option>
       <option value="combined">Combined</option>
     </select>
+    <select id="statusFilter" onchange="filterResults()">
+      <option value="">All Status</option>
+      <option value="new">New</option>
+      <option value="quoted">Quoted</option>
+      <option value="archived">Archived</option>
+    </select>
     <div class="count" id="resultCount"></div>
   </div>
 
@@ -134,9 +158,9 @@ tr{cursor:pointer}
           <th>Facility</th>
           <th>Contact</th>
           <th>Type</th>
+          <th>Status</th>
           <th>Gaps</th>
           <th>Recs</th>
-          <th>Bundling</th>
           <th>Date</th>
         </tr>
       </thead>
@@ -154,9 +178,11 @@ tr{cursor:pointer}
       <h2 id="detailTitle">Assessment Detail</h2>
       <button class="detail-close" onclick="closeDetail()">&times;</button>
     </div>
+    <div class="status-bar" id="statusBar"></div>
     <div class="detail-body" id="detailBody"></div>
     <div class="detail-actions">
-      <button class="btn btn-primary" onclick="window.print()">Print / Save PDF</button>
+      <button class="btn btn-primary" onclick="generateProposal()">Generate Proposal</button>
+      <button class="btn btn-secondary" onclick="window.print()">Print Detail</button>
       <button class="btn btn-secondary" onclick="copyDetail()">Copy to Clipboard</button>
       <button class="btn btn-secondary" onclick="closeDetail()">Close</button>
     </div>
@@ -165,8 +191,8 @@ tr{cursor:pointer}
 
 <script>
 /* ──── Supabase Config ──── */
-const SUPABASE_URL = 'https://oowxyewqikfjrapmmyzh.supabase.co'; // e.g. 'https://xyzabc.supabase.co'
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vd3h5ZXdxaWtmanJhcG1teXpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMjcwMDQsImV4cCI6MjA5MDkwMzAwNH0.RqVxsCoPzYdrfV8B2G0Hufr1fJMcmF7VXinGvXyIGZQ'; // anon/public key
+const SUPABASE_URL = 'https://oowxyewqikfjrapmmyzh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vd3h5ZXdxaWtmanJhcG1teXpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMjcwMDQsImV4cCI6MjA5MDkwMzAwNH0.RqVxsCoPzYdrfV8B2G0Hufr1fJMcmF7VXinGvXyIGZQ';
 
 let allResults = [];
 let currentDetail = null;
@@ -174,7 +200,8 @@ let currentDetail = null;
 /* ──── Helpers ──── */
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
 const typeLabels = {hospital_cssd:'Hospital CSSD',day_surgery:'Day Surgery',dental:'Dental',endoscopy:'Endoscopy',combined:'Combined'};
-const bundleLabels = {yes:'Yes',maybe:'Maybe',no:'No'};
+const bundleLabels = {yes:'Yes',tell_me_more:'Maybe',no:'No'};
+const statusLabels = {new:'New',quoted:'Quoted',archived:'Archived'};
 
 function formatDate(d){
   if(!d) return '—';
@@ -205,9 +232,11 @@ async function loadResults(){
 
 /* ──── Stats ──── */
 function updateStats(){
+  const active = allResults.filter(r=>(r.status||'new')!=='archived');
   document.getElementById('statTotal').textContent = allResults.length;
-  document.getElementById('statGaps').textContent = allResults.filter(r=>(r.gap_count||0)>0).length;
-  document.getElementById('statBundling').textContent = allResults.filter(r=>r.bundling_interest==='yes'||r.bundling_interest==='maybe').length;
+  document.getElementById('statNew').textContent = allResults.filter(r=>!r.status||r.status==='new').length;
+  document.getElementById('statQuoted').textContent = allResults.filter(r=>r.status==='quoted').length;
+  document.getElementById('statGaps').textContent = allResults.filter(r=>(r.gap_count||0)>0 && (r.status||'new')!=='archived').length;
   const week = Date.now() - 7*24*60*60*1000;
   document.getElementById('statRecent').textContent = allResults.filter(r=>new Date(r.created_at)>week).length;
 }
@@ -221,13 +250,14 @@ function renderTable(results){
   }
   document.getElementById('tableBody').innerHTML = results.map((r,i)=>{
     const gaps = r.gap_count||0;
+    const status = r.status||'new';
     return `<tr onclick="showDetail(${i})" data-idx="${i}">
       <td class="td-name">${esc(r.facility_name||'Unnamed')}</td>
       <td class="td-contact">${esc(r.contact_person||'')}${r.contact_email?' — '+esc(r.contact_email):''}</td>
       <td><span class="badge badge-type">${esc(typeLabels[r.facility_type]||r.facility_type||'—')}</span></td>
+      <td><span class="badge badge-${status}">${statusLabels[status]||status}</span></td>
       <td>${gaps>0?`<span class="badge badge-gaps">${gaps}</span>`:'<span class="badge badge-ok">0</span>'}</td>
       <td>${r.rec_count||0}</td>
-      <td>${esc(bundleLabels[r.bundling_interest]||'—')}</td>
       <td class="td-date">${formatDate(r.created_at)}</td>
     </tr>`;
   }).join('');
@@ -237,14 +267,74 @@ function renderTable(results){
 function filterResults(){
   const q = document.getElementById('searchInput').value.toLowerCase();
   const typeF = document.getElementById('typeFilter').value;
+  const statusF = document.getElementById('statusFilter').value;
   let filtered = allResults;
   if(typeF) filtered = filtered.filter(r=>r.facility_type===typeF);
+  if(statusF) filtered = filtered.filter(r=>(r.status||'new')===statusF);
   if(q) filtered = filtered.filter(r=>
     (r.facility_name||'').toLowerCase().includes(q)||
     (r.contact_person||'').toLowerCase().includes(q)||
     (r.contact_email||'').toLowerCase().includes(q)
   );
   renderTable(filtered);
+}
+
+function getCurrentFiltered(){
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const typeF = document.getElementById('typeFilter').value;
+  const statusF = document.getElementById('statusFilter').value;
+  let filtered = allResults;
+  if(typeF) filtered = filtered.filter(r=>r.facility_type===typeF);
+  if(statusF) filtered = filtered.filter(r=>(r.status||'new')===statusF);
+  if(q) filtered = filtered.filter(r=>
+    (r.facility_name||'').toLowerCase().includes(q)||
+    (r.contact_person||'').toLowerCase().includes(q)||
+    (r.contact_email||'').toLowerCase().includes(q)
+  );
+  return filtered;
+}
+
+/* ──── Status Update ──── */
+async function updateStatus(id, newStatus){
+  try {
+    const resp = await fetch(SUPABASE_URL + '/rest/v1/assessments?id=eq.' + id, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type':'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ status: newStatus })
+    });
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+
+    // Update local data
+    const item = allResults.find(r=>r.id===id);
+    if(item) item.status = newStatus;
+    if(currentDetail && currentDetail.id===id) currentDetail.status = newStatus;
+    updateStats();
+    filterResults();
+    renderStatusBar();
+  } catch(e){
+    alert('Failed to update status: ' + e.message);
+  }
+}
+
+function renderStatusBar(){
+  if(!currentDetail) return;
+  const status = currentDetail.status||'new';
+  let html = `<div class="current-status">Status: <strong>${statusLabels[status]||status}</strong></div>`;
+  if(status==='new'){
+    html += `<button class="btn btn-success" onclick="updateStatus('${currentDetail.id}','quoted')">Mark as Quoted</button>`;
+    html += `<button class="btn btn-danger" onclick="updateStatus('${currentDetail.id}','archived')">Archive</button>`;
+  } else if(status==='quoted'){
+    html += `<button class="btn btn-secondary" onclick="updateStatus('${currentDetail.id}','new')">Back to New</button>`;
+    html += `<button class="btn btn-danger" onclick="updateStatus('${currentDetail.id}','archived')">Archive</button>`;
+  } else if(status==='archived'){
+    html += `<button class="btn btn-secondary" onclick="updateStatus('${currentDetail.id}','new')">Restore</button>`;
+  }
+  document.getElementById('statusBar').innerHTML = html;
 }
 
 /* ──── Detail View ──── */
@@ -255,6 +345,7 @@ function showDetail(idx){
   currentDetail = r;
 
   document.getElementById('detailTitle').textContent = r.facility_name || 'Assessment Detail';
+  renderStatusBar();
   let html = '';
 
   // Facility
@@ -356,19 +447,6 @@ function closeDetail(){
   currentDetail = null;
 }
 
-function getCurrentFiltered(){
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  const typeF = document.getElementById('typeFilter').value;
-  let filtered = allResults;
-  if(typeF) filtered = filtered.filter(r=>r.facility_type===typeF);
-  if(q) filtered = filtered.filter(r=>
-    (r.facility_name||'').toLowerCase().includes(q)||
-    (r.contact_person||'').toLowerCase().includes(q)||
-    (r.contact_email||'').toLowerCase().includes(q)
-  );
-  return filtered;
-}
-
 function copyDetail(){
   if(!currentDetail) return;
   const text = currentDetail.summary_text || 'No summary available';
@@ -378,6 +456,234 @@ function copyDetail(){
   const btn = event.target;
   btn.textContent = '✓ Copied';
   setTimeout(()=>{btn.textContent='Copy to Clipboard'},2000);
+}
+
+/* ──── Proposal PDF Generator ──── */
+function generateProposal(){
+  if(!currentDetail) return;
+  const r = currentDetail;
+  const cssd = r.cssd_data||{};
+  const endo = r.endoscopy_data||{};
+  const cons = r.consumables_data||{};
+  const comp = r.compliance_data||{};
+  const gaps = r.gaps||[];
+  const recs = r.recommendations||[];
+  const hasCSSD = r.facility_type!=='endoscopy';
+  const hasEndo = ['endoscopy','combined','day_surgery'].includes(r.facility_type);
+  const stepLabels = {detergent_soak:'Soak in detergent',scope_flush:'Channel flush',brush_channels:'Brush channels',leak_test:'Leak test',rinse_before_aer:'Rinse before AER'};
+  const aspLabels = {full_traceability:'Full digital traceability',audit_ready:'Audit-ready documentation',reduce_costs:'Reduce costs',standardise:'Standardise processes',improve_compliance:'Improve AS 5369 compliance',faster_turnaround:'Faster turnaround',upskill_staff:'Upskill staff',single_supplier:'Single supplier solution'};
+
+  // Group recs by category
+  const recsByCat = {};
+  recs.forEach(rec => {
+    if(!recsByCat[rec.cat]) recsByCat[rec.cat] = [];
+    recsByCat[rec.cat].push(rec);
+  });
+
+  // Build proposal HTML
+  let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Proposal — ${esc(r.facility_name)}</title>
+<style>
+@page{margin:20mm 18mm;size:A4}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Roboto,-apple-system,sans-serif;color:#1f2937;line-height:1.6;font-size:11pt}
+.cover{page-break-after:always;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:90vh;text-align:center}
+.cover-logo{width:200px;margin-bottom:40px}
+.cover h1{font-size:28pt;color:#1b3a5c;font-weight:800;letter-spacing:2px;margin-bottom:8px}
+.cover h2{font-size:16pt;color:#6b7280;font-weight:400;margin-bottom:40px}
+.cover .facility{font-size:20pt;color:#1b3a5c;font-weight:700;margin-bottom:8px}
+.cover .date{font-size:11pt;color:#9ca3af;margin-top:20px}
+.cover .prepared{font-size:10pt;color:#9ca3af;margin-top:8px}
+
+h2{font-size:16pt;color:#1b3a5c;border-bottom:3px solid #1b3a5c;padding-bottom:6px;margin:28px 0 16px}
+h3{font-size:12pt;color:#1b3a5c;margin:18px 0 10px}
+p{margin-bottom:10px}
+
+.info-table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:10pt}
+.info-table td{padding:6px 12px;border:1px solid #e5e7eb;vertical-align:top}
+.info-table td:first-child{width:180px;background:#f9fafb;font-weight:600;color:#4b5563}
+
+.gap-box{background:#fde8e8;border-left:4px solid #c81e1e;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0}
+.gap-box h4{color:#c81e1e;font-size:10pt;margin-bottom:4px}
+.gap-box ul{margin-left:18px;font-size:10pt;color:#374151}
+.gap-box li{margin-bottom:4px}
+
+.rec-card{border:1px solid #e5e7eb;border-radius:8px;margin-bottom:14px;overflow:hidden;page-break-inside:avoid}
+.rec-header{padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.rec-header.high{background:#fde8e8;border-bottom:1px solid #fca5a5}
+.rec-header.medium{background:#fef3c7;border-bottom:1px solid #fcd34d}
+.rec-header.low{background:#dbeafe;border-bottom:1px solid #93c5fd}
+.rec-header h4{font-size:11pt;color:#1f2937;margin:0}
+.rec-priority{font-size:9pt;font-weight:700;padding:2px 10px;border-radius:10px;text-transform:uppercase}
+.rec-priority.high{background:#c81e1e;color:#fff}
+.rec-priority.medium{background:#b45309;color:#fff}
+.rec-priority.low{background:#2563eb;color:#fff}
+.rec-body{padding:12px 14px;font-size:10pt;color:#374151}
+.rec-body .standard{margin-top:8px;font-size:9pt;color:#6b7280;font-style:italic}
+
+.workflow-step{display:flex;align-items:flex-start;margin-bottom:10px;font-size:10pt}
+.workflow-num{width:28px;height:28px;background:#1b3a5c;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:9pt;flex-shrink:0;margin-right:12px;margin-top:2px}
+.workflow-content{flex:1}
+.workflow-content strong{color:#1b3a5c}
+
+.summary-box{background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:16px;margin:16px 0}
+.summary-box h4{color:#057a55;margin-bottom:8px}
+
+.footer{margin-top:40px;padding-top:16px;border-top:2px solid #e5e7eb;text-align:center;font-size:9pt;color:#9ca3af}
+.footer strong{color:#1b3a5c}
+
+@media print{
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style></head><body>`;
+
+  // ── COVER PAGE ──
+  html += `<div class="cover">
+    <img class="cover-logo" src="https://macemark.com.au/wp-content/uploads/2020/08/Macemark_Logo_Macemark-Technology_Dark-300x126.png" alt="Macemark Technology" onerror="this.style.display='none'">
+    <h1>CONSUMABLE SUPPLY</h1>
+    <h2>Proposal &amp; Site Assessment</h2>
+    <div class="facility">${esc(r.facility_name)}</div>
+    <div style="color:#6b7280;font-size:12pt">${esc(typeLabels[r.facility_type]||r.facility_type)}</div>
+    <div class="date">Prepared: ${formatDate(new Date())}</div>
+    <div class="prepared">Prepared by Macemark Technology | macemark.com.au</div>
+  </div>`;
+
+  // ── YOUR FACILITY ──
+  html += `<h2>1. Your Facility</h2>
+  <table class="info-table">
+    <tr><td>Facility Name</td><td>${esc(r.facility_name)}</td></tr>
+    <tr><td>Contact</td><td>${esc(r.contact_person)}${r.contact_email?' — '+esc(r.contact_email):''}${r.contact_phone?' — '+esc(r.contact_phone):''}</td></tr>
+    <tr><td>Facility Type</td><td>${esc(typeLabels[r.facility_type]||r.facility_type)}</td></tr>
+    <tr><td>Reprocessing Staff</td><td>${r.staff_count||'—'}</td></tr>
+  </table>`;
+
+  // ── CURRENT EQUIPMENT ──
+  html += `<h2>2. Current Equipment &amp; Setup</h2>`;
+
+  if(hasCSSD){
+    html += `<h3>CSSD Equipment</h3><table class="info-table">`;
+    if(cssd.steam?.has) html += `<tr><td>Steam Sterilizers</td><td>${cssd.steam.count}x ${esc(cssd.steam.brand||'')} (${cssd.steam.type||'—'}) — ~${cssd.steam.dailyCycles||0} cycles/day per machine</td></tr>`;
+    if(cssd.lowtemp?.has) html += `<tr><td>Low-Temp Sterilizers</td><td>${cssd.lowtemp.count}x ${esc(cssd.lowtemp.brand||'')} (${cssd.lowtemp.type||'—'}) — ~${cssd.lowtemp.dailyCycles||0} cycles/day per machine</td></tr>`;
+    if(cssd.wd?.has) html += `<tr><td>Washer-Disinfectors</td><td>${cssd.wd.count}x ${esc(cssd.wd.brand||'')} — ~${cssd.wd.dailyCycles||0} cycles/day per machine</td></tr>`;
+    if(cssd.ultra?.has) html += `<tr><td>Ultrasonic Cleaners</td><td>${cssd.ultra.count}x — ~${cssd.ultra.dailyCycles||0} cycles/day per machine</td></tr>`;
+    html += `<tr><td>Traceability</td><td>${esc(cssd.traceability||'None specified')}</td></tr>`;
+    html += `</table>`;
+  }
+
+  if(hasEndo){
+    html += `<h3>Endoscopy</h3><table class="info-table">`;
+    html += `<tr><td>AERs</td><td>${endo.aerCount||0}x ${esc(endo.aerBrand||'')}</td></tr>`;
+    html += `<tr><td>Daily Procedures</td><td>~${endo.dailyProcedures||0}</td></tr>`;
+    html += `<tr><td>Bedside Pre-Cleaning</td><td>${endo.bedsideCleaning==='yes'?'Yes — kit in use':endo.bedsideCleaning==='no'?'No — not currently performed':'Not specified'}</td></tr>`;
+    html += `<tr><td>Reprocessing Steps</td><td>${(endo.endoSteps||[]).map(s=>stepLabels[s]||s).join(', ')||'None specified'}</td></tr>`;
+    html += `</table>`;
+  }
+
+  html += `<h3>Current Consumables</h3><table class="info-table">
+    <tr><td>Chemistry Supplier</td><td>${esc(cons.chemistry||'—')}</td></tr>
+    <tr><td>Detergent</td><td>${cons.hasDetergent==='yes'?'Yes — '+(cons.detergentType||'type not specified'):cons.hasDetergent==='no'?'No detergent in use':'Not specified'}</td></tr>
+    <tr><td>Rinse Aid / Neutraliser</td><td>${esc(cons.rinseNeutraliser||'—')}${cons.neutraliserPurpose?' — '+esc(cons.neutraliserPurpose):''}</td></tr>
+    <tr><td>Chemical Indicators</td><td>Types in use: ${(cons.ciClasses||[]).join(', ')||'None'} (Brand: ${esc(cons.ciBrand||'—')})</td></tr>
+    <tr><td>Process Challenge Devices</td><td>${cons.hasPCD==='yes'?'Yes':'No'}</td></tr>
+    <tr><td>Residual Protein Testing</td><td>${cons.hasProteinTest==='yes'?'Yes':'No'}</td></tr>
+    <tr><td>Result Recording</td><td>${esc(cons.resultRecording||'—')}</td></tr>
+  </table>`;
+
+  // ── COMPLIANCE GAPS ──
+  if(gaps.length>0){
+    html += `<h2>3. Compliance Gaps Identified</h2>
+    <p>Based on your assessment responses, the following gaps were identified against <strong>AS 5369:2023</strong>${hasEndo?' and <strong>GENCA/GESA Infection Prevention and Control in Endoscopy</strong> guidelines':''}:</p>
+    <div class="gap-box"><h4>Areas Requiring Attention (${gaps.length})</h4><ul>`;
+    gaps.forEach(g => html += `<li>${esc(g)}</li>`);
+    html += `</ul></div>`;
+  }
+
+  // ── RECOMMENDED PRODUCTS ──
+  const sectionNum = gaps.length > 0 ? 4 : 3;
+  html += `<h2>${sectionNum}. Recommended Products</h2>
+  <p>Based on your equipment, workflows, and compliance requirements, Macemark Technology recommends the following consumable products for <strong>${esc(r.facility_name)}</strong>.</p>`;
+
+  Object.keys(recsByCat).forEach(cat => {
+    html += `<h3>${esc(cat)}</h3>`;
+    recsByCat[cat].forEach(rec => {
+      html += `<div class="rec-card">
+        <div class="rec-header ${rec.priority||'low'}">
+          <h4>${esc(rec.product)}</h4>
+          <span class="rec-priority ${rec.priority||'low'}">${(rec.priority||'recommended').toUpperCase()}</span>
+        </div>
+        <div class="rec-body">
+          <p>${esc(rec.reason)}</p>
+          ${rec.standard?`<div class="standard">${esc(rec.standard)}</div>`:''}
+        </div>
+      </div>`;
+    });
+  });
+
+  // ── WHERE EACH PRODUCT FITS ──
+  const wfNum = sectionNum + 1;
+  html += `<h2>${wfNum}. Where Each Product Fits</h2>`;
+
+  if(hasCSSD){
+    html += `<h3>CSSD Reprocessing Workflow</h3>`;
+    const cssdSteps = [
+      {num:'C1',label:'Manual Pre-Cleaning',products:recs.filter(r=>r.cat&&r.cat.includes('Max Range')&&r.product&&r.product.includes('ManualMax'))},
+      {num:'C2',label:'Ultrasonic Cleaning',products:recs.filter(r=>r.product&&r.product.includes('SonicMax'))},
+      {num:'C3',label:'Washer-Disinfector',products:recs.filter(r=>r.product&&(r.product.includes('ZyMax')||r.product.includes('DryMax')))},
+      {num:'C4',label:'Sterilization Monitoring',products:recs.filter(r=>r.cat&&r.cat.includes('Sterilization Indicator'))},
+      {num:'C5',label:'Cleaning Verification',products:recs.filter(r=>r.cat&&r.cat.includes('Cleaning Verification'))},
+      {num:'C6',label:'Traceability',products:recs.filter(r=>r.product&&r.product.includes('Bionova'))},
+    ];
+    cssdSteps.forEach(step => {
+      if(step.products.length>0){
+        html += `<div class="workflow-step"><div class="workflow-num">${step.num}</div><div class="workflow-content"><strong>${step.label}</strong><br>${step.products.map(p=>esc(p.product)).join(', ')}</div></div>`;
+      }
+    });
+  }
+
+  if(hasEndo){
+    html += `<h3>Endoscopy Reprocessing Workflow</h3>`;
+    const endoSteps = [
+      {num:'E1',label:'Bedside Pre-Cleaning',products:recs.filter(r=>r.product&&r.product.includes('StageOne'))},
+      {num:'E2',label:'Manual Cleaning',products:recs.filter(r=>r.product&&r.product.includes('AquaBlue'))},
+      {num:'E3',label:'Scope Verification',products:recs.filter(r=>r.cat&&r.cat.includes('Meditech')&&r.product&&!r.product.includes('StageOne')&&!r.product.includes('AquaBlue')&&!r.product.includes('ProTech'))},
+      {num:'E4',label:'Storage &amp; Protection',products:recs.filter(r=>r.product&&r.product.includes('ProTech'))},
+    ];
+    endoSteps.forEach(step => {
+      if(step.products.length>0){
+        html += `<div class="workflow-step"><div class="workflow-num">${step.num}</div><div class="workflow-content"><strong>${step.label}</strong><br>${step.products.map(p=>esc(p.product)).join(', ')}</div></div>`;
+      }
+    });
+  }
+
+  // ── NEXT STEPS ──
+  const nextNum = wfNum + 1;
+  html += `<h2>${nextNum}. Next Steps</h2>
+  <div class="summary-box">
+    <h4>How to proceed</h4>
+    <p>Your Macemark representative will be in touch to discuss this proposal in detail. We can provide:</p>
+    <ul style="margin-left:18px;margin-top:8px">
+      <li>Product samples and trials tailored to your facility</li>
+      <li>Detailed pricing and bundled supply agreements</li>
+      <li>On-site training and implementation support</li>
+      <li>Ongoing compliance and audit support</li>
+      ${comp.bundling==='yes'||comp.bundling==='tell_me_more'?'<li><strong>Bundled supply agreement</strong> — you expressed interest in consolidated supply</li>':''}
+    </ul>
+  </div>`;
+
+  // ── FOOTER ──
+  html += `<div class="footer">
+    <strong>Macemark Technology</strong> — Trusted since 1983<br>
+    macemark.com.au | sales@sess.com.au<br><br>
+    <em>This proposal is aligned with AS 5369:2023 (Reprocessing of reusable medical devices)${hasEndo?', GENCA/GESA Infection Prevention and Control in Endoscopy (2025 Update)':''} and ISO 11140-1.</em>
+  </div>`;
+
+  html += `</body></html>`;
+
+  // Open in new window for printing
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(()=> win.print(), 500);
 }
 
 // Keyboard shortcut
