@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SupplyCare</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue: #1a56db; --blue-dark: #1e40af; --blue-light: #dbeafe;
+      --green: #057a55; --green-light: #d1fae5; --green-dark: #065f46;
+      --red: #c81e1e; --red-light: #fde8e8;
+      --amber: #b45309; --amber-light: #fef3c7; --amber-dark: #92400e;
+      --purple: #6d28d9; --purple-light: #ede9fe;
+      --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+      --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280;
+      --gray-600: #4b5563; --gray-700: #374151; --gray-800: #1f2937;
+      --radius: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--gray-100); color: var(--gray-800); min-height: 100vh; }
+
+    /* Header */
+    header { background: var(--blue); color: #fff; padding: 0 1rem; display: flex; align-items: center; justify-content: space-between; height: 56px; box-shadow: var(--shadow-md); position: sticky; top: 0; z-index: 100; }
+    header h1 { font-size: 1.1rem; font-weight: 800; letter-spacing: 0.01em; }
+    .header-sub { font-size: 0.72rem; opacity: 0.75; }
+    .header-proj { font-size: 0.8rem; opacity: 0.9; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }
+
+    /* Nav */
+    nav { background: #fff; display: flex; border-bottom: 2px solid var(--gray-200); position: sticky; top: 56px; z-index: 99; }
+    nav button { flex: 1; padding: 0.75rem 0.25rem; border: none; background: none; font-size: 0.78rem; font-weight: 600; color: var(--gray-500); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: color 0.15s, border-color 0.15s; }
+    nav button.active { color: var(--blue); border-bottom-color: var(--blue); }
+    nav button:hover:not(.active) { color: var(--gray-700); background: var(--gray-50); }
+
+    /* Layout */
+    main { max-width: 680px; margin: 0 auto; padding: 1rem; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Cards */
+    .card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 1rem; overflow: hidden; }
+    .card-header { padding: 0.875rem 1rem; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+    .card-header h2 { font-size: 0.95rem; font-weight: 700; }
+    .card-body { padding: 1rem; }
+
+    /* Forms */
+    .form-row { margin-bottom: 0.875rem; }
+    label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--gray-600); margin-bottom: 0.35rem; }
+    input[type="text"], input[type="number"], input[type="date"], select, textarea {
+      width: 100%; padding: 0.5rem 0.75rem; border: 1.5px solid var(--gray-300); border-radius: var(--radius);
+      font-size: 0.9rem; color: var(--gray-800); background: #fff; transition: border-color 0.15s;
+      appearance: none; -webkit-appearance: none;
+    }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,86,219,0.12); }
+    textarea { resize: vertical; min-height: 60px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    @media (max-width: 480px) { .form-grid { grid-template-columns: 1fr; } }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; border-radius: var(--radius); font-size: 0.875rem; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.15s, transform 0.1s; white-space: nowrap; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-primary:hover { background: var(--blue-dark); }
+    .btn-success { background: var(--green); color: #fff; }
+    .btn-amber { background: var(--amber); color: #fff; }
+    .btn-danger { background: var(--red); color: #fff; }
+    .btn-outline { background: #fff; color: var(--gray-700); border: 1.5px solid var(--gray-300); }
+    .btn-outline:hover { background: var(--gray-50); }
+    .btn-sm { padding: 0.3rem 0.65rem; font-size: 0.78rem; }
+    .btn-icon { padding: 0.35rem 0.5rem; }
+    .btn-full { width: 100%; justify-content: center; }
+
+    /* Badges */
+    .badge { display: inline-flex; align-items: center; gap: 0.2rem; padding: 0.18rem 0.5rem; border-radius: 99px; font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+    .badge-blue { background: var(--blue-light); color: var(--blue-dark); }
+    .badge-green { background: var(--green-light); color: var(--green-dark); }
+    .badge-amber { background: var(--amber-light); color: var(--amber-dark); }
+    .badge-purple { background: var(--purple-light); color: var(--purple); }
+    .badge-gray { background: var(--gray-100); color: var(--gray-600); }
+
+    /* ── HOME SCREEN ── */
+    .home-intro { text-align: center; padding: 2rem 1rem; }
+    .home-intro .big-icon { font-size: 3rem; margin-bottom: 0.75rem; }
+    .home-intro h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .home-intro p { font-size: 0.875rem; color: var(--gray-500); }
+
+    /* Site picker cards */
+    .site-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    @media (max-width: 400px) { .site-grid { grid-template-columns: 1fr; } }
+    .site-card { background: #fff; border: 2px solid var(--gray-200); border-radius: var(--radius); padding: 1rem; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; text-align: center; }
+    .site-card:hover { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,86,219,0.1); }
+    .site-card .sc-icon { font-size: 1.75rem; margin-bottom: 0.4rem; }
+    .site-card .sc-name { font-weight: 700; font-size: 0.9rem; color: var(--gray-800); }
+    .site-card .sc-meta { font-size: 0.75rem; color: var(--gray-500); margin-top: 0.2rem; }
+
+    /* Visit type banner */
+    .visit-banner { border-radius: var(--radius); padding: 1.1rem 1.25rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem; }
+    .visit-banner.refill { background: var(--blue); color: #fff; }
+    .visit-banner.restock { background: var(--amber); color: #fff; }
+    .visit-banner .vb-icon { font-size: 2.2rem; flex-shrink: 0; }
+    .visit-banner .vb-type { font-size: 1.4rem; font-weight: 800; letter-spacing: 0.03em; line-height: 1; }
+    .visit-banner .vb-desc { font-size: 0.8rem; opacity: 0.85; margin-top: 0.3rem; line-height: 1.4; }
+
+    /* Progress */
+    .progress-wrap { margin: 0.5rem 0 1rem; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem; }
+    .progress-label .p-done { color: var(--green); }
+    .progress-track { background: var(--gray-200); border-radius: 99px; height: 8px; overflow: hidden; }
+    .progress-bar { height: 100%; background: var(--green); border-radius: 99px; transition: width 0.4s ease; }
+
+    /* Checklist */
+    .checklist-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; border-bottom: 1px solid var(--gray-100); transition: background 0.15s; }
+    .checklist-item:last-child { border-bottom: none; }
+    .checklist-item.done { background: #f0fdf4; }
+    .check-status { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--gray-300); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.9rem; transition: all 0.2s; }
+    .checklist-item.done .check-status { background: var(--green); border-color: var(--green); color: #fff; }
+    .check-info { flex: 1; min-width: 0; }
+    .check-name { font-weight: 700; font-size: 0.875rem; }
+    .checklist-item.done .check-name { color: var(--gray-400); }
+    .check-meta { font-size: 0.75rem; color: var(--gray-500); margin-top: 0.1rem; }
+    .check-done-summary { font-size: 0.72rem; color: var(--green-dark); margin-top: 0.15rem; font-weight: 600; }
+    .checklist-item.done .check-meta { color: var(--gray-400); }
+
+    /* Complete banner */
+    .all-done-banner { text-align: center; padding: 2rem 1rem; color: var(--green); }
+    .all-done-banner .ad-icon { font-size: 3rem; }
+    .all-done-banner h3 { font-size: 1.1rem; font-weight: 700; margin-top: 0.5rem; }
+    .all-done-banner p { font-size: 0.875rem; color: var(--gray-500); margin-top: 0.3rem; }
+
+    /* ── SETTINGS ── */
+    .settings-subnav { display: flex; gap: 0.4rem; flex-wrap: wrap; padding: 0.75rem 1rem; border-bottom: 1px solid var(--gray-200); background: var(--gray-50); }
+    .settings-subnav button { padding: 0.35rem 0.85rem; border-radius: 99px; border: 1.5px solid var(--gray-300); background: #fff; font-size: 0.78rem; font-weight: 600; color: var(--gray-600); cursor: pointer; transition: all 0.15s; }
+    .settings-subnav button.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .settings-panel { display: none; padding: 1rem; }
+    .settings-panel.active { display: block; }
+
+    /* List items in settings */
+    .settings-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--gray-100); }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-row .sr-info { flex: 1; min-width: 0; }
+    .settings-row .sr-name { font-weight: 700; font-size: 0.875rem; }
+    .settings-row .sr-meta { font-size: 0.75rem; color: var(--gray-500); margin-top: 0.1rem; }
+    .settings-row .sr-actions { display: flex; gap: 0.3rem; flex-shrink: 0; }
+
+    /* Site group in asset settings */
+    .asset-group-head { padding: 0.4rem 1rem; background: var(--gray-50); border-bottom: 1px solid var(--gray-200); font-size: 0.75rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.05em; display: flex; justify-content: space-between; align-items: center; }
+
+    /* Chem rows */
+    .chem-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+    .chem-row select { flex: 2; }
+    .chem-row input[type="number"] { flex: 1; min-width: 70px; }
+
+    /* Misc */
+    .empty { text-align: center; padding: 2rem 1rem; color: var(--gray-400); }
+    .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .empty p { font-size: 0.875rem; }
+    .alert { padding: 0.75rem 1rem; border-radius: var(--radius); font-size: 0.85rem; margin-bottom: 1rem; display: none; }
+    .alert.show { display: block; }
+    .alert-success { background: var(--green-light); color: var(--green-dark); border: 1px solid #a7f3d0; }
+    .alert-info { background: var(--blue-light); color: var(--blue-dark); border: 1px solid #93c5fd; }
+    .export-bar { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    hr { border: none; border-top: 1px solid var(--gray-200); margin: 0.75rem 0; }
+    .list-scroll { max-height: 450px; overflow-y: auto; }
+    .program-badge { display: inline-block; padding: 0.2rem 0.6rem; background: var(--purple-light); color: var(--purple); border-radius: 99px; font-size: 0.72rem; font-weight: 700; }
+
+    /* Modal */
+    .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-backdrop.open { display: flex; }
+    .modal { background: #fff; border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+    .modal-header { padding: 1rem; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; }
+    .modal-header h3 { font-size: 1rem; font-weight: 700; }
+    .modal-body { padding: 1rem; }
+    .modal-footer { padding: 0.875rem 1rem; border-top: 1px solid var(--gray-200); display: flex; gap: 0.5rem; justify-content: flex-end; }
+
+    /* Visit type pill on modal */
+    .visit-type-pill { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.9rem; border-radius: 99px; font-weight: 700; font-size: 0.875rem; margin-bottom: 1rem; }
+    .visit-type-pill.refill { background: var(--blue); color: #fff; }
+    .visit-type-pill.restock { background: var(--amber); color: #fff; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>SupplyCare</h1>
+    <div class="header-sub">Job Management</div>
+  </div>
+  <div class="header-proj" id="headerProj">—</div>
+</header>
+
+<nav>
+  <button class="active" onclick="switchTab('home')">🏠 Home</button>
+  <button onclick="switchTab('history')">📋 History</button>
+  <button onclick="switchTab('settings')">⚙️ Settings</button>
+</nav>
+
+<main>
+
+  <!-- ══════════════ HOME TAB ══════════════ -->
+  <div id="tab-home" class="tab-content active">
+    <div id="homeContent"></div>
+  </div>
+
+  <!-- ══════════════ HISTORY TAB ══════════════ -->
+  <div id="tab-history" class="tab-content">
+    <div class="alert alert-success" id="historyAlert"></div>
+    <div class="card">
+      <div class="card-header">
+        <h2>Visit History</h2>
+        <span id="historyCount" class="badge badge-blue">0</span>
+      </div>
+      <div class="card-body" style="padding:0.5rem 1rem;">
+        <div class="form-grid" style="gap:0.5rem;">
+          <div>
+            <label style="margin-bottom:0.2rem;">Filter: Site</label>
+            <select id="historySiteFilter" onchange="renderHistory()">
+              <option value="">All Sites</option>
+            </select>
+          </div>
+          <div>
+            <label style="margin-bottom:0.2rem;">Filter: Type</label>
+            <select id="historyTypeFilter" onchange="renderHistory()">
+              <option value="">All Types</option>
+              <option value="refill">Refill</option>
+              <option value="restock">Restock</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="list-scroll" id="historyList"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════ SETTINGS TAB ══════════════ -->
+  <div id="tab-settings" class="tab-content">
+
+    <!-- Project context banner -->
+    <div class="card" style="margin-bottom:0.75rem;">
+      <div class="card-body" style="padding:0.6rem 1rem;">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <label style="margin:0; flex-shrink:0;">Active Project:</label>
+          <select id="settingsProjectSelect" onchange="selectProject(this.value)" style="flex:1;">
+            <option value="">— choose project —</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modalNewProject')">+ New</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="settings-subnav">
+        <button class="active" onclick="switchSettings('projects')">Projects</button>
+        <button onclick="switchSettings('sites')">Sites</button>
+        <button onclick="switchSettings('assets')">Assets</button>
+        <button onclick="switchSettings('chemistry')">Chemistry</button>
+        <button onclick="switchSettings('data')">Data</button>
+      </div>
+
+      <!-- Projects panel -->
+      <div class="settings-panel active" id="sp-projects">
+        <div style="display:flex; justify-content:flex-end; margin-bottom:0.75rem;">
+          <button class="btn btn-primary btn-sm" onclick="openModal('modalNewProject')">+ New Project</button>
+        </div>
+        <div id="settingsProjectList"></div>
+      </div>
+
+      <!-- Sites panel -->
+      <div class="settings-panel" id="sp-sites">
+        <div style="display:flex; justify-content:flex-end; margin-bottom:0.75rem;">
+          <button class="btn btn-primary btn-sm" onclick="openModal('modalAddSite')">+ Add Site</button>
+        </div>
+        <div id="settingsSiteList"></div>
+      </div>
+
+      <!-- Assets panel -->
+      <div class="settings-panel" id="sp-assets">
+        <div style="display:flex; justify-content:flex-end; margin-bottom:0.75rem;">
+          <button class="btn btn-primary btn-sm" onclick="openModal('modalAddAsset')">+ Add Asset</button>
+        </div>
+        <div id="settingsAssetList"></div>
+      </div>
+
+      <!-- Chemistry panel -->
+      <div class="settings-panel" id="sp-chemistry">
+        <div id="chemSettingsList"></div>
+        <hr />
+        <div style="display:flex; gap:0.5rem;">
+          <input type="text" id="newChemInput" placeholder="New chemistry type…" />
+          <button class="btn btn-primary" onclick="addChemType()">Add</button>
+        </div>
+      </div>
+
+      <!-- Data panel -->
+      <div class="settings-panel" id="sp-data">
+        <div class="export-bar">
+          <button class="btn btn-outline btn-sm" onclick="exportJSON()">⬇ Export JSON</button>
+          <button class="btn btn-outline btn-sm" onclick="exportCSV()">⬇ Export CSV</button>
+          <label class="btn btn-outline btn-sm" style="cursor:pointer; margin:0;">
+            ⬆ Import JSON
+            <input type="file" accept=".json" style="display:none" onchange="importJSON(event)" />
+          </label>
+        </div>
+        <hr />
+        <div style="display:flex; justify-content:flex-end;">
+          <button class="btn btn-danger btn-sm" onclick="deleteCurrentProject()">🗑️ Delete Current Project</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end settings -->
+
+</main>
+
+
+<!-- ══════════════ MODALS ══════════════ -->
+
+<!-- New / Edit Project -->
+<div class="modal-backdrop" id="modalNewProject">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalProjectTitle">New Project</h3>
+      <button class="btn btn-outline btn-sm btn-icon" onclick="closeModal('modalNewProject')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label>Project Name *</label>
+        <input type="text" id="projName" placeholder="e.g. Townsville Base Hospital – 2026" />
+      </div>
+      <div class="form-row">
+        <label>Client / Facility</label>
+        <input type="text" id="projClient" placeholder="e.g. Townsville Base Hospital" />
+      </div>
+      <div class="form-row">
+        <label>Date</label>
+        <input type="date" id="projDate" />
+      </div>
+      <div class="form-row">
+        <label>Service Program</label>
+        <select id="projProgram">
+          <option value="monthly-restock">Monthly Restock — one restock visit per month</option>
+          <option value="monthly-restock-weekly-refill">Monthly Restock + Weekly Refills — refill each week, restock monthly</option>
+        </select>
+      </div>
+      <div class="form-row" style="margin-bottom:0;">
+        <label>Notes</label>
+        <textarea id="projNotes" placeholder="Contract notes, special instructions…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalNewProject')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProject()">Save Project</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Site -->
+<div class="modal-backdrop" id="modalAddSite">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalSiteTitle">Add Site</h3>
+      <button class="btn btn-outline btn-sm btn-icon" onclick="closeModal('modalAddSite')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row" style="margin-bottom:0;">
+        <label>Site Name *</label>
+        <input type="text" id="siteName" placeholder="e.g. ICU Wing, Ward A…" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalAddSite')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSite()">Save Site</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Asset -->
+<div class="modal-backdrop" id="modalAddAsset">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalAssetTitle">Add Asset</h3>
+      <button class="btn btn-outline btn-sm btn-icon" onclick="closeModal('modalAddAsset')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label>Site *</label>
+        <select id="assetSite"></select>
+      </div>
+      <div class="form-row">
+        <label>Machine ID *</label>
+        <input type="text" id="assetName" placeholder="e.g. D1 (4336)" />
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>Machine Type</label>
+          <input type="text" id="assetModel" placeholder="e.g. Duck 1" />
+        </div>
+        <div class="form-row">
+          <label>Serial Number</label>
+          <input type="text" id="assetSerial" />
+        </div>
+      </div>
+      <div class="form-row" style="margin-bottom:0;">
+        <label>Room / Location</label>
+        <input type="text" id="assetLocation" placeholder="e.g. Med Ward 1" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalAddAsset')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAsset()">Save Asset</button>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Visit (from checklist) -->
+<div class="modal-backdrop" id="modalQuickVisit">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="qvAssetName">Record Visit</h3>
+      <button class="btn btn-outline btn-sm btn-icon" onclick="closeModal('modalQuickVisit')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="qvTypePill"></div>
+      <div class="form-row" id="qvDateRow" style="display:none;">
+        <label>Visit Date</label>
+        <input type="date" id="qvDate" />
+      </div>
+      <div class="form-row" id="qvCycleRow">
+        <label>Cycle Count on Arrival</label>
+        <input type="number" id="qvCycleCount" placeholder="e.g. 123456" min="0" />
+      </div>
+      <label id="qvChemLabel" style="font-size:0.8rem; font-weight:600; color:var(--gray-600); display:block; margin-bottom:0.5rem;"></label>
+      <div id="qvChemRows"></div>
+      <button class="btn btn-outline btn-sm" style="margin-bottom:0.75rem;" onclick="addQvChemRow()">+ Add Chemistry</button>
+      <div class="form-row" style="margin-bottom:0;">
+        <label>Notes</label>
+        <textarea id="qvNotes" placeholder="Optional notes…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalQuickVisit')">Cancel</button>
+      <button id="qvSaveBtn" class="btn btn-primary" onclick="saveQuickVisit()">Save Visit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Visit Detail -->
+<div class="modal-backdrop" id="modalVisitDetail">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="vdTitle">Visit Detail</h3>
+      <button class="btn btn-outline btn-sm btn-icon" onclick="closeModal('modalVisitDetail')">✕</button>
+    </div>
+    <div class="modal-body" id="vdBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" onclick="deleteCurrentVisit()">Delete</button>
+      <button class="btn btn-outline" onclick="closeModal('modalVisitDetail')">Close</button>
+      <button class="btn btn-primary" onclick="editCurrentVisit()">✎ Edit</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ══════════════════════════════════════
+// CONSTANTS
+// ══════════════════════════════════════
+const PROGRAMS = [
+  { id: 'monthly-restock',              name: 'Monthly Restock',                  short: 'Monthly Restock' },
+  { id: 'monthly-restock-weekly-refill', name: 'Monthly Restock + Weekly Refills', short: 'Restock + Refills' },
+];
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+let state = {
+  projects: [], sites: [], assets: [], visits: [],
+  currentProjectId: null,
+  currentSiteId: null,
+  chemTypes: ['Detergent', 'Rinse Aid', 'Sanitiser', 'Pre-Soak', 'Descaler', 'Degreaser'],
+};
+
+let editingProjectId = null;
+let editingAssetId   = null;
+let editingSiteId    = null;
+let viewingVisitId   = null;
+let qvAssetId        = null;
+let qvType           = null;
+let qvChemRows       = [];
+let qvEditingVisitId = null;   // non-null when the modal is editing an existing visit
+
+function save() { localStorage.setItem('supplycare_v2', JSON.stringify(state)); }
+
+function load() {
+  const raw = localStorage.getItem('supplycare_v2') || localStorage.getItem('supplycare_data');
+  if (!raw) return;
+  try {
+    const d = JSON.parse(raw);
+    state = { ...state, ...d };
+    if (!state.sites)  state.sites  = [];
+    if (!state.currentSiteId) state.currentSiteId = null;
+    // Migrate visits
+    state.visits = state.visits.map(v => ({ visitType: 'refill', ...v }));
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function today() { return new Date().toISOString().split('T')[0]; }
+function fmtDate(d) { if (!d) return '—'; const [y,m,day]=d.split('-'); return `${day}/${m}/${y}`; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showAlert(id, msg) {
+  const el = document.getElementById(id); if (!el) return;
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3500);
+}
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-backdrop').forEach(el =>
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); })
+);
+
+// ══════════════════════════════════════
+// PROGRAM / VISIT TYPE LOGIC
+// ══════════════════════════════════════
+function determineVisitType(projectId, siteId) {
+  const proj = state.projects.find(p => p.id === projectId);
+  if (!proj || proj.programId === 'monthly-restock' || !proj.programId) return 'restock';
+
+  // monthly-restock-weekly-refill: restock if last restock >= 25 days ago
+  const lastRestock = state.visits
+    .filter(v => v.projectId === projectId && v.siteId === siteId && v.visitType === 'restock')
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
+
+  if (!lastRestock) return 'restock';
+  const days = Math.floor((new Date(today()) - new Date(lastRestock.date)) / 86400000);
+  return days >= 25 ? 'restock' : 'refill';
+}
+
+function getLastRestockDays(projectId, siteId) {
+  const lastRestock = state.visits
+    .filter(v => v.projectId === projectId && v.siteId === siteId && v.visitType === 'restock')
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
+  if (!lastRestock) return null;
+  return Math.floor((new Date(today()) - new Date(lastRestock.date)) / 86400000);
+}
+
+function getVisitedTodaySet(projectId, siteId) {
+  const t = today();
+  return new Set(
+    state.visits
+      .filter(v => v.projectId === projectId && v.siteId === siteId && v.date === t)
+      .map(v => v.assetId)
+  );
+}
+
+// ══════════════════════════════════════
+// TABS
+// ══════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach((el, i) => {
+    el.classList.toggle('active', ['home','history','settings'][i] === name);
+  });
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'home')     renderHome();
+  if (name === 'history')  { populateHistoryFilters(); renderHistory(); }
+  if (name === 'settings') { renderSettingsProjectSelect(); switchSettings(currentSettingsSection); }
+}
+
+let currentSettingsSection = 'projects';
+function switchSettings(section) {
+  currentSettingsSection = section;
+  document.querySelectorAll('.settings-subnav button').forEach((btn, i) => {
+    btn.classList.toggle('active', ['projects','sites','assets','chemistry','data'][i] === section);
+  });
+  document.querySelectorAll('.settings-panel').forEach(el => el.classList.remove('active'));
+  document.getElementById('sp-' + section).classList.add('active');
+  if (section === 'projects')  renderSettingsProjects();
+  if (section === 'sites')     renderSettingsSites();
+  if (section === 'assets')    renderSettingsAssets();
+  if (section === 'chemistry') renderChemSettings();
+}
+
+// ══════════════════════════════════════
+// HOME
+// ══════════════════════════════════════
+function renderHome() {
+  const proj = state.projects.find(p => p.id === state.currentProjectId);
+  document.getElementById('headerProj').textContent = proj ? proj.name : 'No Project';
+
+  const wrap = document.getElementById('homeContent');
+
+  // No project set
+  if (!proj) {
+    wrap.innerHTML = `
+      <div class="home-intro">
+        <div class="big-icon">🏗️</div>
+        <h2>No project set up yet</h2>
+        <p>Go to <strong>Settings</strong> to create a project and add sites and assets.</p>
+        <button class="btn btn-primary" style="margin-top:1rem;" onclick="switchTab('settings')">Open Settings</button>
+      </div>`;
+    return;
+  }
+
+  const sites = state.sites.filter(s => s.projectId === proj.id);
+  if (!sites.length) {
+    wrap.innerHTML = `
+      <div class="home-intro">
+        <div class="big-icon">📍</div>
+        <h2>No sites configured</h2>
+        <p>Go to <strong>Settings → Sites</strong> to add sites for this project.</p>
+        <button class="btn btn-primary" style="margin-top:1rem;" onclick="switchTab('settings'); switchSettings('sites')">Add Sites</button>
+      </div>`;
+    return;
+  }
+
+  // Site selected — show checklist
+  const site = sites.find(s => s.id === state.currentSiteId);
+  if (site) {
+    renderChecklist(proj, site);
+    return;
+  }
+
+  // Site picker
+  const program = PROGRAMS.find(p => p.id === proj.programId) || PROGRAMS[0];
+  wrap.innerHTML = `
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-body">
+        <p style="font-size:0.8rem; color:var(--gray-500); margin-bottom:0.2rem;">PROJECT</p>
+        <p style="font-weight:700; font-size:1rem;">${esc(proj.name)}</p>
+        <p style="font-size:0.78rem; margin-top:0.3rem;"><span class="program-badge">${esc(program.name)}</span></p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h2>Select Your Site</h2></div>
+      <div class="card-body">
+        <div class="site-grid">
+          ${sites.map(s => {
+            const assetCount = state.assets.filter(a => a.siteId === s.id).length;
+            const visitType  = determineVisitType(proj.id, s.id);
+            const daysAgo    = getLastRestockDays(proj.id, s.id);
+            const doneToday  = getVisitedTodaySet(proj.id, s.id).size;
+            return `
+              <div class="site-card" onclick="selectSite('${s.id}')">
+                <div class="sc-icon">📍</div>
+                <div class="sc-name">${esc(s.name)}</div>
+                <div class="sc-meta">${assetCount} asset${assetCount!==1?'s':''}</div>
+                <div style="margin-top:0.4rem;">
+                  <span class="badge ${visitType==='refill'?'badge-blue':'badge-amber'}">${visitType==='refill'?'🔄 Refill due':'📦 Restock due'}</span>
+                </div>
+                ${doneToday ? `<div style="margin-top:0.3rem;"><span class="badge badge-green">✓ ${doneToday} done today</span></div>` : ''}
+              </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function selectSite(siteId) {
+  state.currentSiteId = siteId;
+  save();
+  renderHome();
+}
+
+function renderChecklist(proj, site) {
+  const visitType  = determineVisitType(proj.id, site.id);
+  const isRefill   = visitType === 'refill';
+  const assets     = state.assets.filter(a => a.siteId === site.id);
+  const visitedSet = getVisitedTodaySet(proj.id, site.id);
+  const doneCount  = assets.filter(a => visitedSet.has(a.id)).length;
+  const pct        = assets.length ? Math.round((doneCount / assets.length) * 100) : 0;
+  const daysSince  = getLastRestockDays(proj.id, site.id);
+  const program    = PROGRAMS.find(p => p.id === proj.programId) || PROGRAMS[0];
+
+  let descLine = isRefill
+    ? `Change bottles · Collect cycle count${daysSince!==null ? ` · Last restock ${daysSince}d ago` : ''}`
+    : `Restock rooms with fresh bottles${daysSince!==null ? ` · Last restock ${daysSince}d ago` : ' · First restock'}`;
+
+  const allDone = assets.length > 0 && doneCount === assets.length;
+
+  const wrap = document.getElementById('homeContent');
+  wrap.innerHTML = `
+    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+      <button class="btn btn-outline btn-sm" onclick="backToSitePicker()">← Sites</button>
+      <span style="font-weight:700; font-size:0.95rem;">${esc(site.name)}</span>
+      <span class="badge badge-gray" style="margin-left:auto;">${esc(program.short)}</span>
+    </div>
+
+    <div class="visit-banner ${visitType}">
+      <div class="vb-icon">${isRefill ? '🔄' : '📦'}</div>
+      <div>
+        <div class="vb-type">${isRefill ? 'REFILL VISIT' : 'RESTOCK VISIT'}</div>
+        <div class="vb-desc">${esc(descLine)}</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Assets <span class="badge badge-gray" style="margin-left:0.3rem;">${assets.length}</span></h2>
+        <span class="${doneCount===assets.length&&assets.length>0?'badge badge-green':'badge badge-gray'}">${doneCount} / ${assets.length} done</span>
+      </div>
+      ${assets.length ? `
+        <div class="progress-wrap" style="padding:0 1rem;">
+          <div class="progress-track"><div class="progress-bar" style="width:${pct}%"></div></div>
+        </div>` : ''}
+      <div id="checklistItems">
+        ${!assets.length ? `<div class="empty"><div class="empty-icon">🔧</div><p>No assets at this site.<br>Add them in <strong>Settings → Assets</strong>.</p></div>` : ''}
+        ${assets.map(a => renderChecklistItem(a, visitedSet, visitType)).join('')}
+      </div>
+      ${allDone ? `
+        <div class="all-done-banner">
+          <div class="ad-icon">✅</div>
+          <h3>All assets visited!</h3>
+          <p>Great work — all ${assets.length} assets have been serviced today.</p>
+        </div>` : ''}
+    </div>`;
+}
+
+function renderChecklistItem(asset, visitedSet, visitType) {
+  const done = visitedSet.has(asset.id);
+  let doneSummary = '';
+  if (done) {
+    const todayVisit = state.visits
+      .filter(v => v.assetId === asset.id && v.date === today())
+      .sort((a,b) => b.created - a.created)[0];
+    if (todayVisit) {
+      const parts = [];
+      if (todayVisit.visitType === 'refill' && todayVisit.cycleCount != null)
+        parts.push(`Cycle: ${todayVisit.cycleCount.toLocaleString()}`);
+      if (todayVisit.chemistry.length)
+        parts.push(todayVisit.chemistry.map(c => `${c.cartons}× ${c.type}`).join(', '));
+      doneSummary = parts.join(' · ');
+    }
+  }
+  return `
+    <div class="checklist-item ${done?'done':''}" id="cli-${asset.id}">
+      <div class="check-status">${done ? '✓' : ''}</div>
+      <div class="check-info">
+        <div class="check-name">${esc(asset.name)}${asset.model ? ` <span style="font-weight:400;color:var(--gray-500);font-size:0.78rem;">· ${esc(asset.model)}</span>` : ''}</div>
+        ${asset.location ? `<div class="check-meta">${esc(asset.location)}</div>` : ''}
+        ${done && doneSummary ? `<div class="check-done-summary">${esc(doneSummary)}</div>` : ''}
+      </div>
+      ${done
+        ? `<button class="btn btn-outline btn-sm" onclick="viewTodayVisit('${asset.id}')">View</button>`
+        : `<button class="btn ${visitType==='refill'?'btn-primary':'btn-amber'} btn-sm" onclick="openQuickVisit('${asset.id}','${visitType}')">▶ Start</button>`
+      }
+    </div>`;
+}
+
+function backToSitePicker() {
+  state.currentSiteId = null;
+  save();
+  renderHome();
+}
+
+function viewTodayVisit(assetId) {
+  const v = state.visits.filter(x => x.assetId === assetId && x.date === today())
+    .sort((a,b) => b.created - a.created)[0];
+  if (v) viewVisit(v.id);
+}
+
+// ══════════════════════════════════════
+// QUICK VISIT MODAL
+// ══════════════════════════════════════
+function openQuickVisit(assetId, visitType, visitId = null) {
+  const existing = visitId ? state.visits.find(v => v.id === visitId) : null;
+
+  qvAssetId        = assetId;
+  qvType           = visitType;
+  qvChemRows       = [];
+  qvEditingVisitId = existing ? existing.id : null;
+
+  const asset = state.assets.find(a => a.id === assetId);
+  document.getElementById('qvAssetName').textContent =
+    (existing ? 'Edit — ' : '') + (asset ? asset.name : 'Asset');
+  document.getElementById('qvTypePill').innerHTML =
+    `<div class="visit-type-pill ${visitType}">${visitType==='refill'?'🔄 Refill':'📦 Restock'}</div>`;
+
+  // Date is only editable when correcting an existing visit — new visits stay one-tap.
+  document.getElementById('qvDateRow').style.display = existing ? '' : 'none';
+  document.getElementById('qvDate').value = existing ? existing.date : today();
+
+  document.getElementById('qvCycleRow').style.display = visitType === 'refill' ? '' : 'none';
+  document.getElementById('qvCycleCount').value =
+    (existing && existing.cycleCount != null) ? existing.cycleCount : '';
+  document.getElementById('qvChemLabel').textContent = visitType === 'refill' ? 'Bottles Changed' : 'Bottles Restocked';
+  document.getElementById('qvChemRows').innerHTML = '';
+  if (existing) existing.chemistry.forEach(c => addQvChemRow(c.type, c.cartons));
+  document.getElementById('qvNotes').value = existing ? (existing.notes || '') : '';
+
+  const saveBtn = document.getElementById('qvSaveBtn');
+  saveBtn.className   = `btn ${visitType==='refill'?'btn-primary':'btn-amber'}`;
+  saveBtn.textContent = existing ? 'Save Changes' : 'Save Visit';
+  openModal('modalQuickVisit');
+}
+
+// Re-open the visit currently shown in the detail modal, in edit mode.
+function editCurrentVisit() {
+  const v = state.visits.find(v => v.id === viewingVisitId);
+  if (!v) return;
+  closeModal('modalVisitDetail');
+  openQuickVisit(v.assetId, v.visitType === 'restock' ? 'restock' : 'refill', v.id);
+}
+
+function addQvChemRow(type='', cartons='') {
+  const rowId = uid();
+  qvChemRows.push(rowId);
+  // Keep a saved type that's no longer in Settings, so editing can't silently change it.
+  const types = (type && !state.chemTypes.includes(type)) ? [type, ...state.chemTypes] : state.chemTypes;
+  const opts = types.map(c =>
+    `<option value="${esc(c)}" ${c===type?'selected':''}>${esc(c)}</option>`).join('');
+  const row = document.createElement('div');
+  row.className = 'chem-row'; row.id = 'qcr-'+rowId;
+  row.innerHTML = `<select>${opts}</select>
+    <input type="number" min="0" step="1" placeholder="Cartons" value="${cartons}" />
+    <button class="btn btn-danger btn-sm btn-icon" onclick="removeQvChemRow('${rowId}')">✕</button>`;
+  document.getElementById('qvChemRows').appendChild(row);
+}
+
+function removeQvChemRow(id) {
+  qvChemRows = qvChemRows.filter(x => x !== id);
+  document.getElementById('qcr-'+id)?.remove();
+}
+
+function saveQuickVisit() {
+  if (!qvAssetId) return;
+  const asset = state.assets.find(a => a.id === qvAssetId);
+  const cycleEl = document.getElementById('qvCycleCount');
+  const cycleCount = (qvType==='refill' && cycleEl.value!=='') ? parseInt(cycleEl.value,10) : null;
+
+  const chemistry = [];
+  qvChemRows.forEach(rowId => {
+    const row = document.getElementById('qcr-'+rowId);
+    if (!row) return;
+    const t = row.querySelector('select').value;
+    const c = parseInt(row.querySelector('input').value,10)||0;
+    if (t) chemistry.push({ type:t, cartons:c });
+  });
+
+  const notes = document.getElementById('qvNotes').value.trim();
+
+  if (qvEditingVisitId) {
+    const v = state.visits.find(x => x.id === qvEditingVisitId);
+    if (!v) return;
+    v.date       = document.getElementById('qvDate').value || v.date;
+    v.cycleCount = cycleCount;
+    v.chemistry  = chemistry;
+    v.notes      = notes;
+    v.modified   = Date.now();   // audit trail — surfaced in the visit detail
+  } else {
+    state.visits.push({
+      id: uid(),
+      projectId: state.currentProjectId,
+      siteId: asset?.siteId || null,
+      assetId: qvAssetId,
+      visitType: qvType,
+      date: today(),
+      cycleCount,
+      chemistry,
+      notes,
+      created: Date.now(),
+    });
+  }
+
+  const wasEditing = qvEditingVisitId;
+  qvEditingVisitId = null;
+  save();
+  closeModal('modalQuickVisit');
+
+  // Re-render whatever view the user came from
+  if (wasEditing && document.getElementById('tab-history').classList.contains('active')) renderHistory();
+  const proj = state.projects.find(p => p.id === state.currentProjectId);
+  const site = state.sites.find(s => s.id === state.currentSiteId);
+  if (proj && site) renderChecklist(proj, site);
+}
+
+// ══════════════════════════════════════
+// HISTORY
+// ══════════════════════════════════════
+function populateHistoryFilters() {
+  const siteSel = document.getElementById('historySiteFilter');
+  const cur = siteSel.value;
+  siteSel.innerHTML = '<option value="">All Sites</option>';
+  state.sites.filter(s => !state.currentProjectId || s.projectId === state.currentProjectId)
+    .forEach(s => {
+      const o = document.createElement('option');
+      o.value = s.id; o.textContent = s.name;
+      if (s.id === cur) o.selected = true;
+      siteSel.appendChild(o);
+    });
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  const badge = document.getElementById('historyCount');
+  const siteFilter = document.getElementById('historySiteFilter').value;
+  const typeFilter = document.getElementById('historyTypeFilter').value;
+
+  let visits = state.visits
+    .filter(v => !state.currentProjectId || v.projectId === state.currentProjectId)
+    .filter(v => !siteFilter || v.siteId === siteFilter)
+    .filter(v => !typeFilter || v.visitType === typeFilter)
+    .sort((a,b) => b.created - a.created);
+
+  badge.textContent = visits.length;
+
+  if (!visits.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><p>No visits recorded yet.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = visits.map(v => {
+    const asset = state.assets.find(a => a.id === v.assetId);
+    const site  = v.siteId ? state.sites.find(s => s.id === v.siteId) : null;
+    const isRef = v.visitType !== 'restock';
+    const totalC = v.chemistry.reduce((s,c)=>s+(c.cartons||0),0);
+    return `
+      <div class="settings-row" style="cursor:pointer;" onclick="viewVisit('${v.id}')">
+        <div class="sr-info">
+          <div class="sr-name">
+            <span class="badge ${isRef?'badge-blue':'badge-amber'}" style="margin-right:0.3rem;">${isRef?'🔄 Refill':'📦 Restock'}</span>
+            ${esc(asset?.name||'Unknown')}
+          </div>
+          <div class="sr-meta">${fmtDate(v.date)}${site?' · '+esc(site.name):''}</div>
+        </div>
+        <div style="display:flex; gap:0.3rem; flex-wrap:wrap; justify-content:flex-end;">
+          ${isRef && v.cycleCount!=null ? `<span class="badge badge-blue">⚙ ${v.cycleCount.toLocaleString()}</span>` : ''}
+          ${totalC > 0 ? `<span class="badge badge-green">📦 ${totalC}</span>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function viewVisit(id) {
+  const v = state.visits.find(v => v.id === id);
+  if (!v) return;
+  viewingVisitId = id;
+  const asset = state.assets.find(a => a.id === v.assetId);
+  const site  = v.siteId ? state.sites.find(s => s.id === v.siteId) : null;
+  const isRef = v.visitType !== 'restock';
+  const totalC = v.chemistry.reduce((s,c)=>s+(c.cartons||0),0);
+  document.getElementById('vdTitle').innerHTML =
+    `<span class="badge ${isRef?'badge-blue':'badge-amber'}">${isRef?'🔄 Refill':'📦 Restock'}</span> &nbsp;${fmtDate(v.date)}`;
+  document.getElementById('vdBody').innerHTML = `
+    <p><strong>Asset:</strong> ${esc(asset?.name||'Unknown')}${asset?.location?' — '+esc(asset.location):''}</p>
+    ${site?`<p style="margin-top:0.3rem;"><strong>Site:</strong> ${esc(site.name)}</p>`:''}
+    <p style="margin-top:0.3rem;"><strong>Date:</strong> ${fmtDate(v.date)}</p>
+    ${isRef && v.cycleCount!=null?`<p style="margin-top:0.3rem;"><strong>Cycle Count:</strong> ${v.cycleCount.toLocaleString()}</p>`:''}
+    <hr />
+    <p style="font-size:0.82rem; font-weight:700; color:var(--gray-600); margin-bottom:0.4rem;">${isRef?'Bottles Changed':'Bottles Restocked'}</p>
+    ${v.chemistry.length
+      ? v.chemistry.map(c=>`<div style="display:flex;justify-content:space-between;padding:0.35rem 0;border-bottom:1px solid var(--gray-100);font-size:0.875rem;"><span>${esc(c.type)}</span><span class="badge badge-green">${c.cartons} carton${c.cartons!==1?'s':''}</span></div>`).join('')
+        + (v.chemistry.length>1?`<p style="text-align:right;font-size:0.82rem;font-weight:700;margin-top:0.4rem;">Total: ${totalC} cartons</p>`:'')
+      : `<p style="font-size:0.875rem;color:var(--gray-400);">None recorded.</p>`}
+    ${v.notes?`<hr /><p style="font-size:0.875rem;"><strong>Notes:</strong> ${esc(v.notes)}</p>`:''}
+    ${v.modified?`<p style="font-size:0.78rem;color:var(--gray-400);margin-top:0.75rem;">✎ Edited ${new Date(v.modified).toLocaleString('en-AU')}</p>`:''}
+  `;
+  openModal('modalVisitDetail');
+}
+
+function deleteCurrentVisit() {
+  if (!confirm('Delete this visit? This cannot be undone.')) return;
+  state.visits = state.visits.filter(v => v.id !== viewingVisitId);
+  save();
+  closeModal('modalVisitDetail');
+  renderHistory();
+  // Refresh checklist if on home
+  const proj = state.projects.find(p => p.id === state.currentProjectId);
+  const site = state.sites.find(s => s.id === state.currentSiteId);
+  if (document.getElementById('tab-home').classList.contains('active') && proj && site) renderChecklist(proj, site);
+}
+
+// ══════════════════════════════════════
+// SETTINGS — PROJECTS
+// ══════════════════════════════════════
+function renderSettingsProjectSelect() {
+  const sel = document.getElementById('settingsProjectSelect');
+  const cur = sel.value || state.currentProjectId;
+  sel.innerHTML = '<option value="">— choose project —</option>';
+  state.projects.forEach(p => {
+    const o = document.createElement('option');
+    o.value = p.id; o.textContent = p.name;
+    if (p.id === state.currentProjectId) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+function selectProject(id) {
+  state.currentProjectId = id || null;
+  state.currentSiteId    = null;
+  save();
+  renderSettingsProjectSelect();
+  renderSettingsProjects();
+  renderSettingsSites();
+  renderSettingsAssets();
+  document.getElementById('headerProj').textContent =
+    state.projects.find(p=>p.id===id)?.name || 'No Project';
+}
+
+function renderSettingsProjects() {
+  const list = document.getElementById('settingsProjectList');
+  if (!state.projects.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><p>No projects yet. Click <strong>+ New Project</strong>.</p></div>`;
+    return;
+  }
+  list.innerHTML = state.projects.map(p => {
+    const prog = PROGRAMS.find(pr => pr.id === p.programId) || PROGRAMS[0];
+    const ac = state.assets.filter(a => a.projectId === p.id).length;
+    const vc = state.visits.filter(v => v.projectId === p.id).length;
+    return `
+      <div class="settings-row ${p.id===state.currentProjectId?'':''}">
+        <div style="width:10px; height:10px; border-radius:50%; background:${p.id===state.currentProjectId?'var(--green)':'var(--gray-300)'}; flex-shrink:0;"></div>
+        <div class="sr-info">
+          <div class="sr-name">${esc(p.name)}</div>
+          <div class="sr-meta"><span class="program-badge">${esc(prog.short)}</span> · ${ac} assets · ${vc} visits</div>
+        </div>
+        <div class="sr-actions">
+          <button class="btn btn-outline btn-sm" onclick="openEditProject('${p.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteProject('${p.id}')">🗑️</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function openNewProject() {
+  editingProjectId = null;
+  document.getElementById('modalProjectTitle').textContent = 'New Project';
+  ['projName','projClient','projNotes'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('projDate').value = today();
+  document.getElementById('projProgram').value = 'monthly-restock';
+  openModal('modalNewProject');
+}
+
+function openEditProject(id) {
+  editingProjectId = id;
+  const p = state.projects.find(p => p.id === id);
+  if (!p) return;
+  document.getElementById('modalProjectTitle').textContent = 'Edit Project';
+  document.getElementById('projName').value    = p.name;
+  document.getElementById('projClient').value  = p.site || '';
+  document.getElementById('projDate').value    = p.date || '';
+  document.getElementById('projProgram').value = p.programId || 'monthly-restock';
+  document.getElementById('projNotes').value   = p.notes || '';
+  openModal('modalNewProject');
+}
+
+function saveProject() {
+  const name = document.getElementById('projName').value.trim();
+  if (!name) { alert('Please enter a project name.'); return; }
+  if (editingProjectId) {
+    const p = state.projects.find(p => p.id === editingProjectId);
+    if (p) { p.name=name; p.site=document.getElementById('projClient').value.trim();
+      p.date=document.getElementById('projDate').value; p.programId=document.getElementById('projProgram').value;
+      p.notes=document.getElementById('projNotes').value.trim(); }
+  } else {
+    const p = { id:uid(), name, site:document.getElementById('projClient').value.trim(),
+      date:document.getElementById('projDate').value, programId:document.getElementById('projProgram').value,
+      notes:document.getElementById('projNotes').value.trim(), created:today() };
+    state.projects.push(p);
+    state.currentProjectId = p.id;
+  }
+  save();
+  closeModal('modalNewProject');
+  renderSettingsProjectSelect();
+  renderSettingsProjects();
+  document.getElementById('headerProj').textContent =
+    state.projects.find(p=>p.id===state.currentProjectId)?.name||'No Project';
+}
+
+function deleteProject(id) {
+  const p = state.projects.find(p => p.id === id);
+  if (!p) return;
+  const ac = state.assets.filter(a => a.projectId === id).length;
+  const vc = state.visits.filter(v => v.projectId === id).length;
+  if (!confirm(`Delete "${p.name}"?\n\nThis will also delete ${ac} asset(s) and ${vc} visit(s). Cannot be undone.`)) return;
+  state.projects = state.projects.filter(p => p.id !== id);
+  state.sites    = state.sites.filter(s => s.projectId !== id);
+  state.assets   = state.assets.filter(a => a.projectId !== id);
+  state.visits   = state.visits.filter(v => v.projectId !== id);
+  if (state.currentProjectId === id) state.currentProjectId = state.projects[0]?.id || null;
+  save();
+  renderSettingsProjectSelect();
+  renderSettingsProjects();
+}
+
+function deleteCurrentProject() { if (state.currentProjectId) deleteProject(state.currentProjectId); }
+
+// ══════════════════════════════════════
+// SETTINGS — SITES
+// ══════════════════════════════════════
+function renderSettingsSites() {
+  const list = document.getElementById('settingsSiteList');
+  if (!state.currentProjectId) {
+    list.innerHTML = `<div class="empty"><p>Select a project above first.</p></div>`; return;
+  }
+  const sites = state.sites.filter(s => s.projectId === state.currentProjectId);
+  if (!sites.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">📍</div><p>No sites yet. Click <strong>+ Add Site</strong>.</p></div>`; return;
+  }
+  list.innerHTML = sites.map(s => {
+    const ac = state.assets.filter(a => a.siteId === s.id).length;
+    return `
+      <div class="settings-row">
+        <div style="font-size:1.2rem;">📍</div>
+        <div class="sr-info">
+          <div class="sr-name">${esc(s.name)}</div>
+          <div class="sr-meta">${ac} asset${ac!==1?'s':''}</div>
+        </div>
+        <div class="sr-actions">
+          <button class="btn btn-outline btn-sm" onclick="openEditSite('${s.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteSite('${s.id}')">🗑️</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function openAddSite() { editingSiteId=null; document.getElementById('modalSiteTitle').textContent='Add Site'; document.getElementById('siteName').value=''; openModal('modalAddSite'); }
+function openEditSite(id) {
+  editingSiteId = id;
+  const s = state.sites.find(s => s.id === id);
+  if (!s) return;
+  document.getElementById('modalSiteTitle').textContent = 'Edit Site';
+  document.getElementById('siteName').value = s.name;
+  openModal('modalAddSite');
+}
+
+function saveSite() {
+  const name = document.getElementById('siteName').value.trim();
+  if (!name) { alert('Enter a site name.'); return; }
+  if (!state.currentProjectId) { alert('Select a project first.'); return; }
+  if (editingSiteId) {
+    const s = state.sites.find(s => s.id === editingSiteId);
+    if (s) s.name = name;
+  } else {
+    state.sites.push({ id:uid(), projectId:state.currentProjectId, name, created:Date.now() });
+  }
+  save();
+  closeModal('modalAddSite');
+  renderSettingsSites();
+  // refresh asset site dropdowns
+  populateSiteDropdown('assetSite', null);
+}
+
+function deleteSite(id) {
+  const s = state.sites.find(s => s.id === id);
+  if (!s) return;
+  const ac = state.assets.filter(a => a.siteId === id).length;
+  if (!confirm(`Delete site "${s.name}"?\n\n${ac>0?`${ac} asset(s) will become unassigned.`:''}`)) return;
+  state.sites = state.sites.filter(s => s.id !== id);
+  state.assets.forEach(a => { if (a.siteId===id) a.siteId=null; });
+  save(); renderSettingsSites(); renderSettingsAssets();
+}
+
+// ══════════════════════════════════════
+// SETTINGS — ASSETS
+// ══════════════════════════════════════
+function populateSiteDropdown(selectId, selectedSiteId) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Select Site —</option>';
+  state.sites.filter(s => !state.currentProjectId || s.projectId === state.currentProjectId)
+    .forEach(s => {
+      const o = document.createElement('option');
+      o.value = s.id; o.textContent = s.name;
+      if (s.id === selectedSiteId) o.selected = true;
+      sel.appendChild(o);
+    });
+}
+
+function renderSettingsAssets() {
+  const list = document.getElementById('settingsAssetList');
+  if (!state.currentProjectId) {
+    list.innerHTML = `<div class="empty"><p>Select a project above first.</p></div>`; return;
+  }
+  const assets = state.assets.filter(a => a.projectId === state.currentProjectId);
+  if (!assets.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">🔧</div><p>No assets yet. Click <strong>+ Add Asset</strong>.</p></div>`; return;
+  }
+  // Group by site
+  const sites = state.sites.filter(s => s.projectId === state.currentProjectId);
+  const groups = [];
+  sites.forEach(s => {
+    const sa = assets.filter(a => a.siteId === s.id);
+    if (sa.length) groups.push({ label: s.name, id: s.id, assets: sa });
+  });
+  const unassigned = assets.filter(a => !a.siteId);
+  if (unassigned.length) groups.push({ label: 'Unassigned', id: null, assets: unassigned });
+
+  list.innerHTML = groups.map(g => `
+    <div class="asset-group-head">
+      <span>${esc(g.label)}</span>
+      <span class="badge badge-purple">${g.assets.length}</span>
+    </div>
+    ${g.assets.map(a => `
+      <div class="settings-row">
+        <div style="font-size:1.1rem;">🔧</div>
+        <div class="sr-info">
+          <div class="sr-name">${esc(a.name)}${a.model?` <span style="font-weight:400;color:var(--gray-500);">· ${esc(a.model)}</span>`:''}</div>
+          <div class="sr-meta">${a.location?esc(a.location):'No location set'}</div>
+        </div>
+        <div class="sr-actions">
+          <button class="btn btn-outline btn-sm" onclick="openEditAsset('${a.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteAsset('${a.id}')">🗑️</button>
+        </div>
+      </div>`).join('')}
+  `).join('');
+}
+
+function openAddAsset() {
+  editingAssetId = null;
+  document.getElementById('modalAssetTitle').textContent = 'Add Asset';
+  ['assetName','assetModel','assetSerial','assetLocation'].forEach(id => document.getElementById(id).value='');
+  populateSiteDropdown('assetSite', null);
+  openModal('modalAddAsset');
+}
+
+function openEditAsset(id) {
+  editingAssetId = id;
+  const a = state.assets.find(a => a.id === id);
+  if (!a) return;
+  document.getElementById('modalAssetTitle').textContent = 'Edit Asset';
+  document.getElementById('assetName').value     = a.name;
+  document.getElementById('assetModel').value    = a.model||'';
+  document.getElementById('assetSerial').value   = a.serial||'';
+  document.getElementById('assetLocation').value = a.location||'';
+  populateSiteDropdown('assetSite', a.siteId);
+  openModal('modalAddAsset');
+}
+
+function saveAsset() {
+  const name = document.getElementById('assetName').value.trim();
+  if (!name) { alert('Enter a machine ID/name.'); return; }
+  if (!state.currentProjectId) { alert('Select a project first.'); return; }
+  const siteId = document.getElementById('assetSite').value || null;
+  if (editingAssetId) {
+    const a = state.assets.find(a => a.id === editingAssetId);
+    if (a) { a.name=name; a.model=document.getElementById('assetModel').value.trim();
+      a.serial=document.getElementById('assetSerial').value.trim();
+      a.location=document.getElementById('assetLocation').value.trim(); a.siteId=siteId; }
+  } else {
+    state.assets.push({ id:uid(), projectId:state.currentProjectId, siteId, name,
+      model:document.getElementById('assetModel').value.trim(),
+      serial:document.getElementById('assetSerial').value.trim(),
+      location:document.getElementById('assetLocation').value.trim(), created:Date.now() });
+  }
+  save();
+  closeModal('modalAddAsset');
+  renderSettingsAssets();
+}
+
+function deleteAsset(id) {
+  const a = state.assets.find(a => a.id === id);
+  if (!a) return;
+  const vc = state.visits.filter(v => v.assetId === id).length;
+  if (!confirm(`Delete "${a.name}"?\n${vc>0?`Also deletes ${vc} visit(s).`:''}`)) return;
+  state.assets = state.assets.filter(a => a.id !== id);
+  state.visits = state.visits.filter(v => v.assetId !== id);
+  save(); renderSettingsAssets();
+}
+
+// ══════════════════════════════════════
+// CHEMISTRY
+// ══════════════════════════════════════
+function renderChemSettings() {
+  const list = document.getElementById('chemSettingsList');
+  list.innerHTML = !state.chemTypes.length
+    ? '<p style="font-size:0.875rem;color:var(--gray-400);">No chemistry types.</p>'
+    : state.chemTypes.map((c,i) => `
+        <div class="settings-row">
+          <div class="sr-info"><div class="sr-name">${esc(c)}</div></div>
+          <button class="btn btn-danger btn-sm btn-icon" onclick="removeChemType(${i})">✕</button>
+        </div>`).join('');
+}
+function addChemType() {
+  const inp = document.getElementById('newChemInput');
+  const n = inp.value.trim(); if (!n) return;
+  if (state.chemTypes.includes(n)) { alert('Already exists.'); return; }
+  state.chemTypes.push(n); save(); inp.value=''; renderChemSettings();
+}
+function removeChemType(i) {
+  if (!confirm(`Remove "${state.chemTypes[i]}"?`)) return;
+  state.chemTypes.splice(i,1); save(); renderChemSettings();
+}
+
+// ══════════════════════════════════════
+// EXPORT / IMPORT
+// ══════════════════════════════════════
+function exportJSON() { dl('supplycare-data.json', JSON.stringify(state,null,2), 'application/json'); }
+function exportCSV() {
+  const rows = [['Date','Type','Project','Site','Asset','Machine Type','Serial','Location','Cycle Count','Chemistry','Cartons','Notes']];
+  const vis = state.currentProjectId ? state.visits.filter(v=>v.projectId===state.currentProjectId) : state.visits;
+  vis.sort((a,b)=>a.date.localeCompare(b.date)).forEach(v => {
+    const a = state.assets.find(x=>x.id===v.assetId);
+    const p = state.projects.find(x=>x.id===v.projectId);
+    const s = v.siteId?state.sites.find(x=>x.id===v.siteId):null;
+    const base=[v.date,v.visitType||'refill',p?.name||'',s?.name||'',a?.name||'',a?.model||'',a?.serial||'',a?.location||'',(v.visitType!=='restock'&&v.cycleCount!=null)?v.cycleCount:''];
+    if (v.chemistry.length) v.chemistry.forEach(c=>rows.push([...base,c.type,c.cartons,v.notes]));
+    else rows.push([...base,'','',v.notes]);
+  });
+  dl('supplycare-visits.csv', rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n'), 'text/csv');
+}
+function dl(filename, content, type) {
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([content],{type})); a.download=filename; a.click();
+}
+function importJSON(e) {
+  const f=e.target.files[0]; if (!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try {
+      const d=JSON.parse(ev.target.result);
+      if (!d.projects||!d.assets||!d.visits) throw new Error('Invalid format');
+      if (!confirm('Import and merge?')) return;
+      const pIds=new Set(state.projects.map(p=>p.id));
+      const sIds=new Set(state.sites.map(s=>s.id));
+      const aIds=new Set(state.assets.map(a=>a.id));
+      const vIds=new Set(state.visits.map(v=>v.id));
+      (d.projects||[]).forEach(p=>{if(!pIds.has(p.id))state.projects.push(p);});
+      (d.sites||[]).forEach(s=>{if(!sIds.has(s.id))state.sites.push(s);});
+      (d.assets||[]).forEach(a=>{if(!aIds.has(a.id))state.assets.push(a);});
+      (d.visits||[]).forEach(v=>{if(!vIds.has(v.id))state.visits.push(v);});
+      (d.chemTypes||[]).forEach(c=>{if(!state.chemTypes.includes(c))state.chemTypes.push(c);});
+      save(); renderSettingsProjectSelect(); renderSettingsProjects();
+      alert('Import successful!');
+    } catch(err) { alert('Import failed: '+err.message); }
+  };
+  r.readAsText(f); e.target.value='';
+}
+
+// Wire up Settings + modal buttons that need programmatic listeners
+document.getElementById('modalAddSite').addEventListener('click', ()=>{});
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+load();
+// Auto-select first project if only one
+if (!state.currentProjectId && state.projects.length === 1) {
+  state.currentProjectId = state.projects[0].id;
+}
+document.getElementById('projDate').value = today();
+document.getElementById('headerProj').textContent =
+  state.projects.find(p=>p.id===state.currentProjectId)?.name || 'No Project';
+renderHome();
+</script>
+</body>
+</html>
